@@ -1,4 +1,4 @@
-// Package version powers the versioning of the application.
+// Package version powers the versioning of terragen.
 package version
 
 import (

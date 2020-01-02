@@ -28,7 +28,7 @@ func getTerragenCmds() *cobra.Command {
 	var terragenCmd = &cobra.Command{
 		Use:   "terragen [command]",
 		Short: "command to create files/folder for terraform provider",
-		Long:  `This will help user to create initial files/folder to start with custom terraform provider.`,
+		Long:  `Terragen helps user to create custom terraform provider by generating templates for it.`,
 		Args:  cobra.MinimumNArgs(1),
 		RunE:  cm.echoTerragen,
 	}
@@ -42,7 +42,7 @@ func getTerragenCmds() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	// fetching "version" will be happening here.
+	// fetching "version" will be done here.
 	var versionCmd = &cobra.Command{
 		Use:   "version [flags]",
 		Short: "command to fetch the version of terragen installed",

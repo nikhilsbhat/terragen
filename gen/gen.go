@@ -1,3 +1,4 @@
+// Package gen is the core of terragen, where the template generation happens.
 package gen
 
 import (
