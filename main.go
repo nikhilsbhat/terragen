@@ -1,3 +1,4 @@
+// Package main initializes the cli of terragen
 package main
 
 import (

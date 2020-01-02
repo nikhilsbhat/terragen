@@ -1,3 +1,4 @@
+// Package decode can decode the json to the required string.
 package decode
 
 import (
