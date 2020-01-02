@@ -1,7 +1,7 @@
-# config
+# terragen
 
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE)
 
 
 A utility to generate the templates for building sutom [Terraform](https://www.terraform.io/) providers.
@@ -17,7 +17,7 @@ How about creating initial/basic things with single command? terragen addresses 
 ## Requires
 
 * Since there are no prebuilt libraries of Terragen available, it expected that [go](https://golang.org/dl/) to be pre installed on the machine to build one. Installing go can be found [here](https://golang.org/doc/install).
-* Understanding of how to build [custom-provider](ttps://www.terraform.io/docs/extend/writing-custom-providers.html) for terraform.
+* Understanding of how to build [custom-provider](https://www.terraform.io/docs/extend/writing-custom-providers.html) for terraform.
 
 ## Installation
 
