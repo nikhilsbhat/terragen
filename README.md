@@ -62,25 +62,20 @@ Use "terragen [command] --help" for more information about a command."
 
 ### `terragen generate`
 
-Credentials of GCP can be fed to `config` in two ways.
-Either by passing path of credential file while invoking it or by setting environment variable `GOOGLE_APPLICATION_CREDENTIALS` just like how `gcloud` expects to be.
-
-To switch to the cluster in the appropriate GCP you wish, `set` command helps in it.
+The command `generate` helps in generating the provider templates which can be enhanced.
 
 ```bash
-config set -j /path/to/credential.json
-    or
-config set
+terragen generate
 ```
 
-You know which cluster to connect and don't want `config` to figure that out for you? then below command will help you with that
+Pass the required falgs to generate the templates in the required location and with the proper name. If not, it defaults to working directory with the previder name `demo` just like above command.
 
 ```bash
-config set -c core-search-dev-cluster -r us-central1 -j /path/to/credential.json
+terragen generate -n demo -p ~/terraform/demo/
 ```
 
-**Note** `config set` without credentials file works only if the `GOOGLE_APPLICATION_CREDENTIALS` is set.
+**Note** `terragen generate` just creates the templates not the whole provider.
 
 ## Limitations
 
-Right now this works only with kube clusters hosted in [GCP](https://cloud.google.com/), making it available accross other cloud will be more helpful.
+Currently it just creates basic templates, more features to be added to make it generate fully working provider.
