@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE)
 
 
-A utility which helps to switch between multiple [Kubernetes](https://kubernetes.io/) clusters of [GKE](https://cloud.google.com/kubernetes-engine/).
+A utility to generate the templates for building sutom [Terraform](https://www.terraform.io/) providers.
 
 ## Introduction
 
@@ -17,13 +17,12 @@ Config solves exactly the same thing, by letting one to switch the cluster in on
 
 ## Requires
 
-This isn't a standalone tool it still depends on few things like [`gcloud`](https://cloud.google.com/sdk/gcloud/). But makes life lot easier handling it.
-* [`gcloud`](https://cloud.google.com/sdk/install) version 253.0.0 or higher (tested)
+As there are no prebuilt libraries, Terragen expects [GO](https://golang.org/dl/) installed on the machine to build one. This will help you on installing [GO](https://golang.org/doc/install)
 
 ## Installation
 
 ```golang
-go get -u github.com/nikhilsbhat/config
+go get -u github.com/nikhilsbhat/terragen
 go build
 ```
 Use the executable just like any other go-cli application.
@@ -31,7 +30,7 @@ Use the executable just like any other go-cli application.
 If incase few to use this in your piece of code import package in your code.
 ```golang
 import (
-    "github.com/nikhilsbhat/config"
+    "github.com/nikhilsbhat/terragen"
 )
 ```
 
@@ -43,28 +42,26 @@ config [command] [flags]
 Make sure appropriate command is used for the actions, to check the available commands and flags use `config --help`
 
 ```bash
-This will help user to deal with gcloud and kube config activity.
+Terragen helps user to create custom terraform provider by generating templates for it.
 
 
 Usage:
-  config [command] [flags]
+  terragen [command] [flags]
 
 Available Commands:
+  generate    command to generate the initial components for terraform provider
   help        Help about any command
-  set         command to set the config
-  version     command to fetch the version of config installed
+  version     command to fetch the version of terragen installed
 
 Flags:
-  -c, --cluster-name string   name of the cluster which needs to be connected to
-  -h, --help                  help for config
-  -j, --json string           path to gcp auth json file
-  -r, --region strings        region where your cluster resides
-  -v, --version string        version of the cluster (default "1")
+  -h, --help          help for terragen
+  -n, --name string   name of the provider that needs templates
+  -p, --path string   path where the templates has to be generated
 
-Use "config [command] --help" for more information about a command."
+Use "terragen [command] --help" for more information about a command."
 ```
 
-### `config set`
+### `config generate`
 
 Credentials of GCP can be fed to `config` in two ways.
 Either by passing path of credential file while invoking it or by setting environment variable `GOOGLE_APPLICATION_CREDENTIALS` just like how `gcloud` expects to be.
