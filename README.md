@@ -4,11 +4,11 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE) [![shields](https://godoc.org/github.com/nikhilsbhat/terragen?status.svg)](https://godoc.org/github.com/nikhilsbhat/terragen)
 
 
-A utility to generate the templates for building sutom [Terraform](https://www.terraform.io/) providers.
+A utility to generate the templates for building custom [Terraform](https://www.terraform.io/) providers.
 
 ## Introduction
 
-Terraform is one of the best software available to automate the infrastructure and no procrastination in accepting that.
+Terraform is one of the best software available to automate infrastructure and no procrastination in accepting that.
 
 How about extending Terraform? this would be great when we are solving a complexity that are project specific. And Terraform has the same feature in the form of [custom-provider](https://www.terraform.io/docs/extend/how-terraform-works.html). How to create one such provider? they have well [documented](https://www.terraform.io/docs/extend/writing-custom-providers.html) steps for it.
 
