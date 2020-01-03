@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
 	"github.com/nikhilsbhat/terragen/decode"
@@ -50,11 +51,67 @@ import (
 // Provider returns a terraform.ResourceProvider.
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
-		Schema: map[string]*schema.Schema{
+		Schema: map[string]*schema.Schema{},
+
+		ResourcesMap: map[string]*schema.Resource{
+			"null_resource": resource{{ .Package | ToUpper }}(),
+		},
+
+		DataSourcesMap: map[string]*schema.Resource{
+			"null_data_source": dataSource{{ .Package | ToUpper }}(),
 		},
 	}
+}`
+
+var dataSourceTemp = `package {{ .Package }}
+
+import (
+	"github.com/hashicorp/terraform/helper/schema"
+)
+
+func dataSource{{ .Package | ToUpper }}() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSource{{ .Package | ToUpper }}Read,
+
+		Schema: map[string]*schema.Schema{},
+	}
 }
-`
+
+func dataSource{{ .Package | ToUpper }}Read(d *schema.ResourceData, meta interface{}) error {
+	// Your code goes here
+	return nil
+}`
+
+var resourceTemp = `package {{ .Package }}
+
+import (
+	"github.com/hashicorp/terraform/helper/schema"
+)
+
+func resource{{ .Package | ToUpper }}() *schema.Resource {
+	return &schema.Resource{
+		Create: resource{{ .Package | ToUpper }}Create,
+		Read:   resource{{ .Package | ToUpper }}Read,
+		Delete: resource{{ .Package | ToUpper }}Delete,
+
+		Schema: map[string]*schema.Schema{},
+	}
+}
+
+func resource{{ .Package | ToUpper }}Create(d *schema.ResourceData, meta interface{}) error {
+	// Your code goes here
+	return nil
+}
+
+func resource{{ .Package | ToUpper }}Read(d *schema.ResourceData, meta interface{}) error {
+	// Your code goes here
+	return nil
+}
+
+func resource{{ .Package | ToUpper }}Delete(d *schema.ResourceData, meta interface{}) error {
+	// Your code goes here
+	return nil
+}`
 
 // Generate generates the basic folder/files templates to build terraform custom provider.
 func (i *GenInput) Generate(cmd *cobra.Command, args []string) {
@@ -74,15 +131,18 @@ func (i *GenInput) Generate(cmd *cobra.Command, args []string) {
 	}
 
 	// Generating the required files
-	fmt.Println(ui.Info("Generating the required files\n"))
-	if err := i.genTerraFiles("main.go", i.Path); err != nil {
-		fmt.Println(ui.Error(decode.GetStringOfMessage(err)))
-		os.Exit(1)
+	var files = map[string]string{
+		"main.go":        i.Path,
+		"provider.go":    fmt.Sprintf("%s/%s", i.Path, i.Package),
+		"data_source.go": fmt.Sprintf("%s/%s", i.Path, i.Package),
+		"resource.go":    fmt.Sprintf("%s/%s", i.Path, i.Package),
 	}
-	// Generating the required files
-	if err := i.genTerraFiles("provider.go", fmt.Sprintf("%s/%s", i.Path, i.Package)); err != nil {
-		fmt.Println(ui.Error(decode.GetStringOfMessage(err)))
-		os.Exit(1)
+
+	for key, value := range files {
+		if err := i.genTerraFiles(key, value); err != nil {
+			fmt.Println(ui.Error(decode.GetStringOfMessage(err)))
+			os.Exit(1)
+		}
 	}
 
 	// Setup the project to make it ready for developable
@@ -126,12 +186,20 @@ func (i *GenInput) genTerraFiles(name, path string) error {
 		return err
 	}
 
+	funcMap := template.FuncMap{
+		"ToUpper": strings.ToUpper,
+	}
+
 	var tmpl *template.Template
 	switch name {
 	case "main.go":
 		tmpl = template.Must(template.New(name).Parse(mainTemp))
 	case "provider.go":
-		tmpl = template.Must(template.New(name).Parse(providerTemp))
+		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(providerTemp))
+	case "data_source.go":
+		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(dataSourceTemp))
+	case "resource.go":
+		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(resourceTemp))
 	}
 
 	tmpl.Execute(file, i)
