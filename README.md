@@ -1,7 +1,7 @@
 # terragen
 
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE) [![shields](https://godoc.org/github.com/nikhilsbhat/terragen?status.svg)](https://godoc.org/github.com/nikhilsbhat/terragen)
 
 
 A utility to generate the templates for building sutom [Terraform](https://www.terraform.io/) providers.
