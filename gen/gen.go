@@ -24,10 +24,11 @@ type GenInput struct {
 	// List of all the dependent packages for terraform, if not passed it picks default.
 	Dependents []string
 	// Path defines where the templates has to be generated.
-	Path        string
+	Path string
+	// TemplateRaw consists of go-templates which are the core for terragen.
+	TemplateRaw TerraTemplate
 	writer      io.Writer
 	template    string
-	TemplateRaw TerraTemplate
 }
 
 // TerraTemplate are the collections of go-templates which are used to generate terraform provider's base template.
@@ -204,13 +205,29 @@ func (i *GenInput) genTerraFiles(name, path string) error {
 	var tmpl *template.Template
 	switch name {
 	case "main.go":
-		tmpl = template.Must(template.New(name).Parse(i.TemplateRaw.rootTemp))
+		if len(i.TemplateRaw.rootTemp) != 0 {
+			tmpl = template.Must(template.New(name).Parse(i.TemplateRaw.rootTemp))
+			return nil
+		}
+		return fmt.Errorf("Template not found for main.go")
 	case "provider.go":
-		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.ProviderTemp))
+		if len(i.TemplateRaw.ProviderTemp) != 0 {
+			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.ProviderTemp))
+			return nil
+		}
+		return fmt.Errorf("Template not found for provider.go")
 	case "data_source.go":
-		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.dataTemp))
+		if len(i.TemplateRaw.dataTemp) != 0 {
+			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.dataTemp))
+			return nil
+		}
+		return fmt.Errorf("Template not found for data_source.go")
 	case "resource.go":
-		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.resourceTemp))
+		if len(i.TemplateRaw.resourceTemp) != 0 {
+			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.resourceTemp))
+			return nil
+		}
+		return fmt.Errorf("Template not found for resource.go")
 	}
 
 	tmpl.Execute(file, i)
