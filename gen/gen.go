@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
@@ -23,12 +24,21 @@ type GenInput struct {
 	// List of all the dependent packages for terraform, if not passed it picks default.
 	Dependents []string
 	// Path defines where the templates has to be generated.
-	Path     string
-	writer   io.Writer
-	template string
+	Path        string
+	writer      io.Writer
+	template    string
+	TemplateRaw TerraTemplate
 }
 
-var mainTemp = `package main
+// TerraTemplate are the collections of go-templates which are used to generate terraform provider's base template.
+type TerraTemplate struct {
+	ProviderTemp string
+	rootTemp     string
+	dataTemp     string
+	resourceTemp string
+}
+
+var rootTemp = `package main
 
 import (
 	{{- range $index, $element := .Dependents }}
@@ -116,6 +126,7 @@ func resource{{ .Package | ToUpper }}Delete(d *schema.ResourceData, meta interfa
 // Generate generates the basic folder/files templates to build terraform custom provider.
 func (i *GenInput) Generate(cmd *cobra.Command, args []string) {
 
+	i.TemplateRaw = i.getTemplate()
 	i.Path = i.getPath()
 	i.template = fmt.Sprintf("terraform-provider-%s", i.Package)
 
@@ -193,13 +204,13 @@ func (i *GenInput) genTerraFiles(name, path string) error {
 	var tmpl *template.Template
 	switch name {
 	case "main.go":
-		tmpl = template.Must(template.New(name).Parse(mainTemp))
+		tmpl = template.Must(template.New(name).Parse(i.TemplateRaw.rootTemp))
 	case "provider.go":
-		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(providerTemp))
+		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.ProviderTemp))
 	case "data_source.go":
-		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(dataSourceTemp))
+		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.dataTemp))
 	case "resource.go":
-		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(resourceTemp))
+		tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.resourceTemp))
 	}
 
 	tmpl.Execute(file, i)
@@ -220,4 +231,17 @@ func (i *GenInput) setupTerragen() error {
 		return err
 	}
 	return nil
+}
+
+// Set the templates to defaults if not specified.
+func (i *GenInput) getTemplate() TerraTemplate {
+	if reflect.DeepEqual(i.TemplateRaw, TerraTemplate{}) {
+		temp := new(TerraTemplate)
+		temp.rootTemp = rootTemp
+		temp.ProviderTemp = providerTemp
+		temp.dataTemp = dataSourceTemp
+		temp.resourceTemp = resourceTemp
+		return *temp
+	}
+	return i.TemplateRaw
 }

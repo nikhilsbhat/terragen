@@ -27,7 +27,7 @@ func getTerragenCmds() *cobra.Command {
 
 	var terragenCmd = &cobra.Command{
 		Use:   "terragen [command]",
-		Short: "command to create files/folder for terraform provider",
+		Short: "Command to create files/folder for terraform provider",
 		Long:  `Terragen helps user to create custom terraform provider by generating templates for it.`,
 		Args:  cobra.MinimumNArgs(1),
 		RunE:  cm.echoTerragen,
@@ -36,7 +36,7 @@ func getTerragenCmds() *cobra.Command {
 
 	var setCmd = &cobra.Command{
 		Use:          "generate [flags]",
-		Short:        "command to generate the initial components for terraform provider",
+		Short:        "Command to generate the initial components for terraform provider",
 		Long:         `This will help user to generate the initial components of terraform provider.`,
 		Run:          genin.Generate,
 		SilenceUsage: true,
@@ -45,7 +45,7 @@ func getTerragenCmds() *cobra.Command {
 	// fetching "version" will be done here.
 	var versionCmd = &cobra.Command{
 		Use:   "version [flags]",
-		Short: "command to fetch the version of terragen installed",
+		Short: "Command to fetch the version of terragen installed",
 		Long:  `This will help user to find what version of terragen he/she installed in her machine.`,
 		RunE:  versionConfig,
 	}
@@ -70,7 +70,7 @@ func versionConfig(cmd *cobra.Command, args []string) error {
 // only functions/methods inside this package can call this.
 
 func getUsageTemplate() string {
-	return `{{printf "\n"}}Usage:{{if .Runnable}}
+	return `Usage:{{if .Runnable}}
   {{.UseLine}}{{end}}{{if gt (len .Aliases) 0}}{{printf "\n" }}
 Aliases:
   {{.NameAndAliases}}{{end}}{{if .HasExample}}{{printf "\n" }}
