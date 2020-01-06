@@ -26,20 +26,22 @@ type GenInput struct {
 	// Path defines where the templates has to be generated.
 	Path string
 	// TemplateRaw consists of go-templates which are the core for terragen.
-	TemplateRaw TerraTemplate
-	writer      io.Writer
-	template    string
+	TemplateRaw    TerraTemplate
+	writer         io.Writer
+	template       string
+	AutoGenMessage string
 }
 
 // TerraTemplate are the collections of go-templates which are used to generate terraform provider's base template.
 type TerraTemplate struct {
 	ProviderTemp string
-	rootTemp     string
-	dataTemp     string
-	resourceTemp string
+	RootTemp     string
+	DataTemp     string
+	ResourceTemp string
 }
 
-var rootTemp = `package main
+var rootTemp = `{{ .AutoGenMessage }}
+package main
 
 import (
 	{{- range $index, $element := .Dependents }}
@@ -52,7 +54,8 @@ func main() {
 		ProviderFunc: {{ .Package }}.Provider})
 }`
 
-var providerTemp = `package {{ .Package }}
+var providerTemp = `{{ .AutoGenMessage }}
+package {{ .Package }}
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
@@ -74,7 +77,8 @@ func Provider() terraform.ResourceProvider {
 	}
 }`
 
-var dataSourceTemp = `package {{ .Package }}
+var dataSourceTemp = `{{ .AutoGenMessage }}
+package {{ .Package }}
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
@@ -93,7 +97,8 @@ func dataSource{{ .Package | ToUpper }}Read(d *schema.ResourceData, meta interfa
 	return nil
 }`
 
-var resourceTemp = `package {{ .Package }}
+var resourceTemp = `{{ .AutoGenMessage }}
+package {{ .Package }}
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
@@ -127,7 +132,7 @@ func resource{{ .Package | ToUpper }}Delete(d *schema.ResourceData, meta interfa
 // Generate generates the basic folder/files templates to build terraform custom provider.
 func (i *GenInput) Generate(cmd *cobra.Command, args []string) {
 
-	i.TemplateRaw = i.getTemplate()
+	i.getTemplate()
 	i.Path = i.getPath()
 	i.template = fmt.Sprintf("terraform-provider-%s", i.Package)
 
@@ -197,6 +202,7 @@ func (i *GenInput) genTerraFiles(name, path string) error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
 	funcMap := template.FuncMap{
 		"ToUpper": strings.ToUpper,
@@ -205,34 +211,35 @@ func (i *GenInput) genTerraFiles(name, path string) error {
 	var tmpl *template.Template
 	switch name {
 	case "main.go":
-		if len(i.TemplateRaw.rootTemp) != 0 {
-			tmpl = template.Must(template.New(name).Parse(i.TemplateRaw.rootTemp))
+		if len(i.TemplateRaw.RootTemp) != 0 {
+			tmpl = template.Must(template.New(name).Parse(i.TemplateRaw.RootTemp))
+			tmpl.Execute(file, i)
 			return nil
 		}
 		return fmt.Errorf("Template not found for main.go")
 	case "provider.go":
 		if len(i.TemplateRaw.ProviderTemp) != 0 {
 			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.ProviderTemp))
+			tmpl.Execute(file, i)
 			return nil
 		}
 		return fmt.Errorf("Template not found for provider.go")
 	case "data_source.go":
-		if len(i.TemplateRaw.dataTemp) != 0 {
-			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.dataTemp))
+		if len(i.TemplateRaw.DataTemp) != 0 {
+			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.DataTemp))
+			tmpl.Execute(file, i)
 			return nil
 		}
 		return fmt.Errorf("Template not found for data_source.go")
 	case "resource.go":
-		if len(i.TemplateRaw.resourceTemp) != 0 {
-			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.resourceTemp))
+		if len(i.TemplateRaw.ResourceTemp) != 0 {
+			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.ResourceTemp))
+			tmpl.Execute(file, i)
 			return nil
 		}
 		return fmt.Errorf("Template not found for resource.go")
 	}
-
-	tmpl.Execute(file, i)
-	file.Close()
-	return nil
+	return fmt.Errorf("Snap.....!! Unable to render the templates")
 }
 
 func (i *GenInput) setupTerragen() error {
@@ -251,14 +258,11 @@ func (i *GenInput) setupTerragen() error {
 }
 
 // Set the templates to defaults if not specified.
-func (i *GenInput) getTemplate() TerraTemplate {
+func (i *GenInput) getTemplate() {
 	if reflect.DeepEqual(i.TemplateRaw, TerraTemplate{}) {
-		temp := new(TerraTemplate)
-		temp.rootTemp = rootTemp
-		temp.ProviderTemp = providerTemp
-		temp.dataTemp = dataSourceTemp
-		temp.resourceTemp = resourceTemp
-		return *temp
+		i.TemplateRaw.RootTemp = rootTemp
+		i.TemplateRaw.ProviderTemp = providerTemp
+		i.TemplateRaw.DataTemp = dataSourceTemp
+		i.TemplateRaw.ResourceTemp = resourceTemp
 	}
-	return i.TemplateRaw
 }
