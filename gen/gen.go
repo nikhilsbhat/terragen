@@ -26,17 +26,22 @@ type GenInput struct {
 	// Path defines where the templates has to be generated.
 	Path string
 	// TemplateRaw consists of go-templates which are the core for terragen.
-	TemplateRaw    TerraTemplate
+	TemplateRaw TerraTemplate
+	// AutoGenMessage will be configured by terragen and cannot be overwritten.
+	AutoGenMessage string
 	writer         io.Writer
 	template       string
-	AutoGenMessage string
 }
 
 // TerraTemplate are the collections of go-templates which are used to generate terraform provider's base template.
 type TerraTemplate struct {
+	// ProviderTemp holds the template for provider
 	ProviderTemp string
-	RootTemp     string
-	DataTemp     string
+	// RootTemp holds the template for root file
+	RootTemp string
+	// DataTemp holds the template for data
+	DataTemp string
+	// ResourceTemp holds the template for resource
 	ResourceTemp string
 }
 
