@@ -2,9 +2,9 @@
 github.com/fatih/color
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
-# github.com/mattn/go-colorable v0.0.9
+# github.com/mattn/go-colorable v0.1.1
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.4
+# github.com/mattn/go-isatty v0.0.5
 github.com/mattn/go-isatty
 # github.com/nikhilsbhat/neuron v0.0.0-20191005183010-c891ed9d85ea
 github.com/nikhilsbhat/neuron/cli/ui
@@ -12,5 +12,5 @@ github.com/nikhilsbhat/neuron/cli/ui
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# golang.org/x/sys v0.0.0-20181205085412-a5c9d58dba9a
+# golang.org/x/sys v0.0.0-20190804053845-51ab0e2deafa
 golang.org/x/sys/unix
