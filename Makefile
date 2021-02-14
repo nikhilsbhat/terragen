@@ -3,6 +3,8 @@ APP_NAME?=terragen
 APP_DIR?=$$(git rev-parse --show-toplevel)
 DEV?=${DEVBOX_TRUE}
 SRC_PACKAGES=$(shell go list -mod=vendor ./... | grep -v "vendor" | grep -v "mocks")
+BUILD_ENVIRONMENT?=${ENVIRONMENT}
+VERSION?=0.1.0
 
 .PHONY: help
 help: ## Prints help (only for targets with comments)
@@ -16,15 +18,12 @@ local.check: local.fmt ## Loads all the dependencies to vendor directory
 	go mod tidy
 
 local.build: local.check ## Generates the artifact with the help of 'go build'
-	go build -o $(APP_NAME) -ldflags="-s -w"
+	go build -o $(APP_NAME) -ldflags="-s -w -X 'github.com/nikhilsbhat/terrgen/version.Versn=${VERSION}' -X 'github.com/nikhilsbhat/terrgen/version.Env=${BUILD_ENVIRONMENT}'"
 
 local.push: local.build ## Pushes built artifact to the specified location
 
 local.run: local.build ## Generates the artifact and start the service in the current directory
 	./${APP_NAME}
-
-local.clean: ## Cleans directory from all built binary and other artifacts
-	rm -rf $(APP_NAME) compose.db
 
 dockerise: local.check ## Containerise the appliction
 	docker build . --tag ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
