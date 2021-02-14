@@ -2,3 +2,4 @@
 .vscode
 terragen
 terraform-provider-demo
+.idea/

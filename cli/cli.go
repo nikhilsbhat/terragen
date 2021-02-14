@@ -26,7 +26,6 @@ func Main() {
 
 // Execute will actually execute the cli by taking the arguments passed to cli.
 func Execute(args []string) error {
-
 	cmd.SetArgs(args)
 	_, err := cmd.ExecuteC()
 	if err != nil {

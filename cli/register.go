@@ -9,13 +9,13 @@ import (
 )
 
 var (
-	cmds  map[string]*cobra.Command
-	genin gen.GenInput
+	// cmds  map[string]*cobra.Command
+	genin gen.Input
 )
 
-type confcmds struct {
-	commands []*cobra.Command
-}
+// type confcmds struct {
+//	commands []*cobra.Command
+// }
 
 // SetTerragenCmds helps in gathering all the subcommands so that it can be used while registering it with main command.
 func SetTerragenCmds() *cobra.Command {
@@ -24,7 +24,6 @@ func SetTerragenCmds() *cobra.Command {
 }
 
 func getTerragenCmds() *cobra.Command {
-
 	var terragenCmd = &cobra.Command{
 		Use:   "terragen [command]",
 		Short: "Command to create files/folder for terraform provider",
@@ -85,7 +84,8 @@ Flags:
 Global Flags:
 {{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}{{printf "\n"}}
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
-  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}{{printf "\n"}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}
+{{if .HasAvailableSubCommands}}{{printf "\n"}}
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}"
 {{printf "\n"}}`
 }

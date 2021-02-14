@@ -7,8 +7,8 @@ import (
 	"fmt"
 )
 
-// JsonDecode decodes the data to json sent to it.
-func JsonDecode(data []byte, i interface{}) error {
+// JSONDecode decodes the data to json sent to it.
+func JSONDecode(data []byte, i interface{}) error {
 	if err := json.Unmarshal(data, i); err != nil {
 		switch err.(type) {
 		case *json.UnmarshalTypeError:
@@ -65,11 +65,11 @@ func unknownTypeError(data []byte, err error) error {
 
 // GetStringOfMessage returns string form of error
 func GetStringOfMessage(g interface{}) string {
-	switch g.(type) {
+	switch typ := g.(type) {
 	case string:
-		return g.(string)
+		return typ
 	case error:
-		return g.(error).Error()
+		return typ.Error()
 	default:
 		return "unknown messagetype"
 	}
