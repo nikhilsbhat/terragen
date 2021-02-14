@@ -234,28 +234,36 @@ func (i *GenInput) genTerraFiles(name, path string) error {
 	case "main.go":
 		if len(i.TemplateRaw.RootTemp) != 0 {
 			tmpl = template.Must(template.New(name).Parse(i.TemplateRaw.RootTemp))
-			tmpl.Execute(file, i)
+			if err := tmpl.Execute(file, i); err != nil {
+				return err
+			}
 			return nil
 		}
 		return fmt.Errorf("Template not found for main.go")
 	case "provider.go":
 		if len(i.TemplateRaw.ProviderTemp) != 0 {
 			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.ProviderTemp))
-			tmpl.Execute(file, i)
+			if err := tmpl.Execute(file, i); err != nil {
+				return err
+			}
 			return nil
 		}
 		return fmt.Errorf("Template not found for provider.go")
 	case "data_source.go":
 		if len(i.TemplateRaw.DataTemp) != 0 {
 			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.DataTemp))
-			tmpl.Execute(file, i)
+			if err := tmpl.Execute(file, i); err != nil {
+				return err
+			}
 			return nil
 		}
 		return fmt.Errorf("Template not found for data_source.go")
 	case "resource.go":
 		if len(i.TemplateRaw.ResourceTemp) != 0 {
 			tmpl = template.Must(template.New(name).Funcs(funcMap).Parse(i.TemplateRaw.ResourceTemp))
-			tmpl.Execute(file, i)
+			if err := tmpl.Execute(file, i); err != nil {
+				return err
+			}
 			return nil
 		}
 		return fmt.Errorf("Template not found for resource.go")

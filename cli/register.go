@@ -57,7 +57,9 @@ func getTerragenCmds() *cobra.Command {
 }
 
 func (cm *cliMeta) echoTerragen(cmd *cobra.Command, args []string) error {
-	cmd.Usage()
+	if err := cmd.Usage(); err != nil {
+		return err
+	}
 	return nil
 }
 
