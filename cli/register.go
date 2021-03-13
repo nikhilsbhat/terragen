@@ -1,7 +1,11 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/nikhilsbhat/neuron/cli/ui"
+	"github.com/nikhilsbhat/terragen/decode"
+	"os"
 
 	gen "github.com/nikhilsbhat/terragen/gen"
 	"github.com/nikhilsbhat/terragen/version"
@@ -63,7 +67,12 @@ func (cm *cliMeta) echoTerragen(cmd *cobra.Command, args []string) error {
 }
 
 func versionConfig(cmd *cobra.Command, args []string) error {
-	fmt.Println("terragen", version.GetVersion())
+	buildInfo, err := json.Marshal(version.GetBuildInfo())
+	if err != nil {
+		fmt.Println(ui.Error(decode.GetStringOfMessage(err)))
+		os.Exit(1)
+	}
+	fmt.Println("terragen version:", string(buildInfo))
 	return nil
 }
 

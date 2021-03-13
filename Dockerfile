@@ -1,4 +1,3 @@
-### Author : BootLabsTech Pvt Ltd.
 ### Description: Dockerfile for Configuration Manager (Compose)
 
 # Stage build
@@ -22,5 +21,5 @@ WORKDIR /root/
 # Copying artifact from builder to end container
 COPY --from=builder /terragen-code/terragen terragen
 
-# Starting 
+# Starting
 ENTRYPOINT [ "./terragen" ]

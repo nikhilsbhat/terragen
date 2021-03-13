@@ -2,6 +2,7 @@ package decode
 
 import (
 	"io/ioutil"
+
 	"os"
 )
 

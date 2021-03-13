@@ -1,10 +1,16 @@
-GOFMT_FILES?=$$(find . -not -path "./vendor/*" -type f -name '*.go')
+GOFMT_FILES?=$(shell find . -not -path "./vendor/*" -type f -name '*.go')
 APP_NAME?=terragen
-APP_DIR?=$$(git rev-parse --show-toplevel)
+APP_DIR?=$(shell git rev-parse --show-toplevel)
 DEV?=${DEVBOX_TRUE}
 SRC_PACKAGES=$(shell go list -mod=vendor ./... | grep -v "vendor" | grep -v "mocks")
 BUILD_ENVIRONMENT?=${ENVIRONMENT}
 VERSION?=0.1.0
+REVISION?=$(shell git rev-parse --verify HEAD)
+DATE?=$(shell date)
+PlATFORM?=$(shell go env GOOS)
+ARCHITECTURE?=$(shell go env GOARCH)
+GOVERSION?=$(shell go version | awk '{printf $$3}')
+BUILD_WITH_FLAGS="-s -w -X 'github.com/nikhilsbhat/terragen/version.Version=${VERSION}' -X 'github.com/nikhilsbhat/terragen/version.Env=${BUILD_ENVIRONMENT}' -X 'github.com/nikhilsbhat/terragen/version.BuildDate=${DATE}' -X 'github.com/nikhilsbhat/terragen/version.Revision=${REVISION}' -X 'github.com/nikhilsbhat/terragen/version.Platform=${PlATFORM}/${ARCHITECTURE}' -X 'github.com/nikhilsbhat/terragen/version.GoVersion=${GOVERSION}'"
 
 .PHONY: help
 help: ## Prints help (only for targets with comments)
@@ -18,7 +24,7 @@ local.check: local.fmt ## Loads all the dependencies to vendor directory
 	go mod tidy
 
 local.build: local.check ## Generates the artifact with the help of 'go build'
-	go build -o $(APP_NAME) -ldflags="-s -w -X 'github.com/nikhilsbhat/terrgen/version.Versn=${VERSION}' -X 'github.com/nikhilsbhat/terrgen/version.Env=${BUILD_ENVIRONMENT}'"
+	go build -o $(APP_NAME) -ldflags=${BUILD_WITH_FLAGS}
 
 local.push: local.build ## Pushes built artifact to the specified location
 
