@@ -12,12 +12,20 @@ ARCHITECTURE?=$(shell go env GOARCH)
 GOVERSION?=$(shell go version | awk '{printf $$3}')
 BUILD_WITH_FLAGS="-s -w -X 'github.com/nikhilsbhat/terragen/version.Version=${VERSION}' -X 'github.com/nikhilsbhat/terragen/version.Env=${BUILD_ENVIRONMENT}' -X 'github.com/nikhilsbhat/terragen/version.BuildDate=${DATE}' -X 'github.com/nikhilsbhat/terragen/version.Revision=${REVISION}' -X 'github.com/nikhilsbhat/terragen/version.Platform=${PlATFORM}/${ARCHITECTURE}' -X 'github.com/nikhilsbhat/terragen/version.GoVersion=${GOVERSION}'"
 
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
+
 .PHONY: help
 help: ## Prints help (only for targets with comments)
 	@grep -E '^[a-zA-Z0-9._-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 local.fmt: ## Lints all the go code in the application.
 	gofmt -w $(GOFMT_FILES)
+	$(GOBIN)/goimports -w $(GOFMT_FILES)
 
 local.check: local.fmt ## Loads all the dependencies to vendor directory
 	go mod vendor

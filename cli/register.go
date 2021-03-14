@@ -3,9 +3,10 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/nikhilsbhat/neuron/cli/ui"
 	"github.com/nikhilsbhat/terragen/decode"
-	"os"
 
 	gen "github.com/nikhilsbhat/terragen/gen"
 	"github.com/nikhilsbhat/terragen/version"
