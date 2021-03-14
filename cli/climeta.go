@@ -1,8 +1,9 @@
 package cli
 
 import (
-	"github.com/nikhilsbhat/neuron/cli/ui"
 	"os"
+
+	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
 type cliMeta struct {
@@ -14,8 +15,10 @@ var (
 )
 
 func init() {
-
-	nui := ui.NeuronUi{&ui.UiWriter{os.Stdout}}
-	cm = &cliMeta{&nui}
-
+	nui := ui.NeuronUi{
+		UiWriter: &ui.UiWriter{
+			Writer: os.Stdout,
+		},
+	}
+	cm = &cliMeta{NeuronUi: &nui}
 }

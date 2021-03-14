@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE) [![shields](https://godoc.org/github.com/nikhilsbhat/terragen?status.svg)](https://godoc.org/github.com/nikhilsbhat/terragen)
 
 
-A utility to generate the templates for building custom [Terraform](https://www.terraform.io/) providers.
+An utility that generates scaffolds for building custom [Terraform](https://www.terraform.io/) providers.
 
 ## Introduction
 
@@ -21,7 +21,7 @@ How about creating initial/basic things with single command? terragen addresses 
 
 ## Installation
 
-```golang
+```shell
 go get -u github.com/nikhilsbhat/terragen
 go build
 ```
@@ -29,6 +29,8 @@ Use the executable just like any other go-cli application.
 
 Found some of the codes useful for you? then start using it by importing the package in your line of codes.
 ```golang
+package main
+
 import (
     "github.com/nikhilsbhat/terragen"
 )

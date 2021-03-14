@@ -2,25 +2,44 @@
 package version
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 )
 
-// This specifies the version of the application and cannot be changed by end user.
-const versn = "0.0.1"
+var (
+	// Version specifies the version of the application and cannot be changed by end user.
+	Version string
 
-// This tells end user that what variant (here we use the name of the git branch to make it simple)
-// of application is he using.
-var env = "alfa"
+	// Env tells end user that what variant (here we use the name of the git branch to make it simple)
+	// of application is he using.
+	Env string
 
-// GetVersion returns the version with variant, and the value will be used to bersion the application.
-// The same version will be displayed at both CLI and app(API).
-func GetVersion() string {
-	var versionString bytes.Buffer
-	fmt.Fprintf(&versionString, "v%s", versn)
-	if env != "" {
-		fmt.Fprintf(&versionString, "-%s", env)
+	BuildDate string
+	GoVersion string
+	Platform  string
+	Revision  string
+)
+
+type BuildInfo struct {
+	Version     string
+	Revision    string
+	Environment string
+	BuildDate   string
+	GoVersion   string
+	Platform    string
+}
+
+// GetBuildInfo return the version and other build info of the application.
+func GetBuildInfo() BuildInfo {
+	if strings.ToLower(Env) != "production" {
+		Env = "alfa"
 	}
-
-	return versionString.String()
+	return BuildInfo{
+		Version:     fmt.Sprintf("v%s", Version),
+		Revision:    Revision,
+		Environment: Env,
+		Platform:    Platform,
+		BuildDate:   BuildDate,
+		GoVersion:   GoVersion,
+	}
 }

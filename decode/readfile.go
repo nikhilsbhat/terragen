@@ -2,6 +2,7 @@ package decode
 
 import (
 	"io/ioutil"
+
 	"os"
 )
 
@@ -16,5 +17,4 @@ func ReadFile(filename string) ([]byte, error) {
 		return nil, conterr
 	}
 	return content, nil
-	//return nil, nil
 }
