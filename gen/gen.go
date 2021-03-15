@@ -290,15 +290,15 @@ func (i *Input) setupTerragen() error {
 		return err
 	}
 
-	goVnd := exec.Command("go", "mod", "vendor") //nolint:gosec
-	goVnd.Dir = i.Path
-	if err := goVnd.Run(); err != nil {
+	goFmt := exec.Command("goimports", "-w", i.Path) //nolint:gosec
+	goFmt.Dir = i.Path
+	if err := goFmt.Run(); err != nil {
 		return err
 	}
 
-	goFmt := exec.Command("goimports", "-w", "./..") //nolint:gosec
-	goFmt.Dir = i.Path
-	if err := goFmt.Run(); err != nil {
+	goVnd := exec.Command("go", "mod", "vendor") //nolint:gosec
+	goVnd.Dir = i.Path
+	if err := goVnd.Run(); err != nil {
 		return err
 	}
 	return nil
