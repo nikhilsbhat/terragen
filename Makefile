@@ -32,12 +32,15 @@ local.check: local.fmt ## Loads all the dependencies to vendor directory
 	go mod tidy
 
 local.build: local.check ## Generates the artifact with the help of 'go build'
-	go build -o $(APP_NAME) -ldflags=${BUILD_WITH_FLAGS}
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser build --rm-dist
 
 local.push: local.build ## Pushes built artifact to the specified location
 
 local.run: local.build ## Generates the artifact and start the service in the current directory
 	./${APP_NAME}
+
+publish: local.check ## Builds and publishes the app
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser release --rm-dist
 
 dockerise: local.check ## Containerise the appliction
 	docker build . --tag ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
