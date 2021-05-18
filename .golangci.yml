@@ -49,6 +49,13 @@ issues:
         - gocritic
       text: "unnecessaryDefer:"
 
+linters-settings:
+  funlen:
+    lines: 100
+
+  lll:
+    line-length: 140
+
 run:
   concurrency: 10
   timeout: 10m

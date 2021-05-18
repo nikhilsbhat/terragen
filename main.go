@@ -2,7 +2,7 @@
 package main
 
 import (
-	cli "github.com/nikhilsbhat/terragen/cli"
+	cli "github.com/nikhilsbhat/terragen/cmd"
 )
 
 // This function is responsible for starting the application.

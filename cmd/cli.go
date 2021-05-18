@@ -1,5 +1,5 @@
 // Package cli will initialize cli of terragen.
-package cli
+package cmd
 
 import (
 	"os"
@@ -12,7 +12,8 @@ var (
 )
 
 func init() {
-	cmd = SetTerragenCmds()
+	initCommands()
+	cmd = SetTerragenCommands()
 }
 
 // Main will take the workload of executing/starting the cli, when the command is passed to it.

@@ -1,28 +1,32 @@
 package gen
 
 import (
-	"os"
-	"path/filepath"
-
+	"fmt"
 	"html/template"
+	"io"
+	"log"
+	"os"
+
+	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
-func (i *Input) createMakefile(app string) error {
-	file, err := os.Create(filepath.Join(i.Path, "Makefile"))
-	if err != nil {
-		return err
+func (i *Input) createMakefile() error {
+	var fileWriter io.Writer
+	if i.DryRun {
+		log.Print(ui.Info(fmt.Sprintf("Makefile would be created under %s", i.Path)))
+		fmt.Println(ui.Info("contents of Makefile source looks like"))
+		fileWriter = os.Stdout
+	} else {
+		file, err := terragenWriter(i.Path, terragenMakefile)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		fileWriter = file
 	}
-	defer file.Close()
 
-	type makefile struct {
-		App string
-	}
-
-	make := makefile{
-		App: app,
-	}
-	tmpl := template.Must(template.New("makefile").Parse(makefileTemplate))
-	if err := tmpl.Execute(file, make); err != nil {
+	tmpl := template.Must(template.New(terragenMakefile).Parse(makefileTemplate))
+	if err := tmpl.Execute(fileWriter, i); err != nil {
 		return err
 	}
 	return nil
@@ -30,7 +34,7 @@ func (i *Input) createMakefile(app string) error {
 
 const makefileTemplate = `
 GOFMT_FILES?=$$(find . -not -path "./vendor/*" -type f -name '*.go')
-APP_NAME?={{ .App }}
+APP_NAME?=terraform-provider-{{ .Provider }}
 APP_DIR?=$$(git rev-parse --show-toplevel)
 SRC_PACKAGES=$(shell go list -mod=vendor ./... | grep -v "vendor" | grep -v "mocks")
 VERSION?=0_0_1
