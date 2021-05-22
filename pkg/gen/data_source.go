@@ -42,11 +42,13 @@ func (i *Input) CreateDataSource(cmd *cobra.Command, args []string) {
 	i.getTemplate()
 
 	if !i.providerScaffolded() {
-		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was not generated earlier\n\t use `terragen create provider` to create one \n\t run `terragen create provider -h` for more info", i.Provider)))
+		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was not generated earlier\n\t use"+
+			" `terragen create provider` to create one \n\t run `terragen create provider -h` for more info", i.Provider)))
 	}
 
 	if i.dataSourceScaffolded() {
-		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for data_source '%s' was already generated\n\t use `terragen edit datasource` to edit one \n\t run `terragen edit datasource -h` for more info", i.DataSource[0])))
+		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for data_source '%s' was already generated\n\t use"+
+			" `terragen edit datasource` to edit one \n\t run `terragen edit datasource -h` for more info", i.DataSource[0])))
 	}
 
 	if err := i.createDataSource(); err != nil {
@@ -86,10 +88,10 @@ func (i *Input) createDataSource() error {
 			log.Println(ui.Info("contents of data source looks like"))
 			fmt.Println(string(dataSourceData))
 		} else {
-			if err = terragenFileCreate(dataSourceFilePath, dataSourceFileName); err != nil {
+			if err = terragenFileCreate(dataSourceFile); err != nil {
 				return fmt.Errorf("oops creating data source errored with: %v ", err)
 			}
-			if err = ioutil.WriteFile(dataSourceFile, dataSourceData, 0755); err != nil {
+			if err = ioutil.WriteFile(dataSourceFile, dataSourceData, 0700); err != nil { //nolint:gosec
 				return fmt.Errorf("oops scaffolding data_source %s errored with: %v ", dataSource, err)
 			}
 		}

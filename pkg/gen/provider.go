@@ -144,10 +144,12 @@ func (i *Input) CreateProvider(cmd *cobra.Command, args []string) {
 	i.AutoGenMessage = autoGenMessage
 	i.Provider = args[0]
 	i.mod = i.setMod()
+	provideFile := filepath.Join(i.Path, i.Provider, terragenProvider)
 
 	log.Println(ui.Info(fmt.Sprintf("go module for scaffold would be: %s", i.mod)))
 	if i.providerScaffolded() {
-		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was already generated\n\t use `terragen create -h` or `terragen edit -h` for more info", i.Provider)))
+		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was already generated\n\t use"+
+			" `terragen create -h` or `terragen edit -h` for more info", i.Provider)))
 	}
 
 	log.Println(ui.Info(fmt.Sprintf("scaffolds for provider '%s' would be generated under: '%s'", i.Provider, i.Path)))
@@ -172,10 +174,10 @@ func (i *Input) CreateProvider(cmd *cobra.Command, args []string) {
 		log.Println(ui.Info("contents of provider looks like"))
 		fmt.Println(string(providerData))
 	} else {
-		if err = terragenFileCreate(filepath.Join(i.Path, i.Provider), terragenProvider); err != nil {
+		if err = terragenFileCreate(provideFile); err != nil {
 			log.Fatal(ui.Error(err.Error()))
 		}
-		if err = ioutil.WriteFile(filepath.Join(i.Path, i.Provider, terragenProvider), providerData, 0755); err != nil {
+		if err = ioutil.WriteFile(provideFile, providerData, 0700); err != nil { //nolint:gosec
 			log.Fatalf(ui.Error(fmt.Sprintf("oops scaffolding provider %s errored with: %v ", i.Provider, err)))
 		}
 	}
@@ -268,7 +270,7 @@ func (i *Input) updateProvider() error {
 	}
 
 	providerFile := filepath.Join(newIn.Path, newIn.Provider, terragenProvider)
-	if err = ioutil.WriteFile(providerFile, updateData, 0755); err != nil {
+	if err = ioutil.WriteFile(providerFile, updateData, 0700); err != nil { //nolint:gosec
 		return err
 	}
 	return nil

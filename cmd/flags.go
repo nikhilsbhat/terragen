@@ -23,6 +23,7 @@ func registerFlags(command string, cmd *cobra.Command) {
 		cmd.PersistentFlags().BoolVarP(&genin.ImporterRequired, "importer-required", "", false, "enable if importer requires scaffold")
 		cmd.PersistentFlags().BoolVarP(&genin.DatasourceRequired, "datasource-required", "", false, "enable if data_source requires scaffold")
 	case "datasource", "resource":
-		cmd.PersistentFlags().StringVarP(&genin.Provider, "provider", "", "demo", "name of the provider for which resource/datasource to be scaffolded")
+		cmd.PersistentFlags().StringVarP(&genin.Provider, "provider", "", "demo",
+			"name of the provider for which resource/datasource to be scaffolded")
 	}
 }

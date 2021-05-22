@@ -62,6 +62,7 @@ generate.mock: ## generates mocks for the selected source packages.
 `
 
 func (i *Input) createMakefile() error {
+	makeFile := filepath.Join(i.Path, terragenMakefile)
 	makeFileData, err := renderTemplate(terragenMakefile, makefileTemplate, i)
 	if err != nil {
 		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terragenMakefile, err)
@@ -72,10 +73,10 @@ func (i *Input) createMakefile() error {
 		log.Println(ui.Info("contents of Makefile source looks like"))
 		fmt.Println(string(makeFileData))
 	} else {
-		if err = terragenFileCreate(i.Path, terragenMakefile); err != nil {
+		if err = terragenFileCreate(makeFile); err != nil {
 			return err
 		}
-		if err = ioutil.WriteFile(filepath.Join(i.Path, terragenMakefile), makeFileData, 0755); err != nil {
+		if err = ioutil.WriteFile(filepath.Join(i.Path, terragenMakefile), makeFileData, 0700); err != nil { //nolint:gosec
 			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terragenMakefile, err)
 		}
 	}

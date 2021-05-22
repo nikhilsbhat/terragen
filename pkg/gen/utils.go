@@ -21,6 +21,6 @@ func hasChange(slice1, slice2 []string) bool {
 
 func byts(slice []string) []byte {
 	buf := &bytes.Buffer{}
-	gob.NewEncoder(buf).Encode(slice)
+	gob.NewEncoder(buf).Encode(slice) //nolint:errcheck
 	return buf.Bytes()
 }

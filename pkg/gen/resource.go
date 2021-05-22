@@ -59,11 +59,13 @@ func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 	i.getTemplate()
 
 	if !i.providerScaffolded() {
-		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was not generated earlier\n\t use `terragen create provider` to create one \n\t run `terragen create provider -h` for more info", i.Provider)))
+		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was not generated earlier\n\t use"+
+			" `terragen create provider` to create one \n\t run `terragen create provider -h` for more info", i.Provider)))
 	}
 
 	if i.resourceScaffolded() {
-		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for resource '%s' was already generated\n\t use `terragen edit resource` to edit one \n\t run `terragen edit resource -h` for more info", i.Resource[0])))
+		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for resource '%s' was already generated\n\t use"+
+			" `terragen edit resource` to edit one \n\t run `terragen edit resource -h` for more info", i.Resource[0])))
 	}
 
 	if err := i.createResource(); err != nil {
@@ -103,11 +105,11 @@ func (i *Input) createResource() error {
 			log.Println(ui.Info("contents of resource looks like"))
 			fmt.Println(string(resourceData))
 		} else {
-			if err = terragenFileCreate(resourceFilePath, resourceFileName); err != nil {
-				return fmt.Errorf("oops creating data source errored with: %v ", err)
+			if err = terragenFileCreate(resourceFile); err != nil {
+				return fmt.Errorf("oops creating resource errored with: %v ", err)
 			}
-			if err = ioutil.WriteFile(resourceFile, resourceData, 0755); err != nil {
-				return fmt.Errorf("oops scaffolding data_source %s errored with: %v ", currentResource, err)
+			if err = ioutil.WriteFile(resourceFile, resourceData, 0700); err != nil { //nolint:gosec
+				return fmt.Errorf("oops scaffolding resource %s errored with: %v ", currentResource, err)
 			}
 		}
 	}

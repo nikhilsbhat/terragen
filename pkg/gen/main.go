@@ -26,6 +26,7 @@ func main() {
 )
 
 func (i *Input) CreateMain() error {
+	mainFile := filepath.Join(i.Path, terragenMain)
 	mainData, err := renderTemplate(terragenMain, i.TemplateRaw.RootTemp, i)
 	if err != nil {
 		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terragenMain, err)
@@ -36,10 +37,10 @@ func (i *Input) CreateMain() error {
 		log.Println(ui.Info("contents of main.go looks like"))
 		fmt.Println(string(mainData))
 	} else {
-		if err = terragenFileCreate(i.Path, terragenMain); err != nil {
+		if err = terragenFileCreate(mainFile); err != nil {
 			return err
 		}
-		if err = ioutil.WriteFile(filepath.Join(i.Path, terragenMain), mainData, 0755); err != nil {
+		if err = ioutil.WriteFile(filepath.Join(i.Path, terragenMain), mainData, 0700); err != nil { //nolint:gosec
 			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terragenMain, err)
 		}
 	}

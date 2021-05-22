@@ -22,8 +22,8 @@ func newInput() *Input {
 	return &Input{}
 }
 
-func terragenFileCreate(path, file string) error {
-	_, err := os.Create(filepath.Join(path, file))
+func terragenFileCreate(path string) error {
+	_, err := os.Create(path)
 	return err
 }
 

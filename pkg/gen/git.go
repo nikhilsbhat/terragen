@@ -35,6 +35,7 @@ terraform.tfstate*
 
 // createGitIgnore scaffolds the provider and its components as per the requirements.
 func (i *Input) createGitIgnore() error {
+	mainFile := filepath.Join(i.Path, terrgenGitIgnore)
 	gitIgnoreData, err := renderTemplate(terrgenGitIgnore, i.TemplateRaw.GitIgnore, i)
 	if err != nil {
 		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terrgenGitIgnore, err)
@@ -45,10 +46,10 @@ func (i *Input) createGitIgnore() error {
 		log.Println(ui.Info("contents of gitignore looks like"))
 		fmt.Println(string(gitIgnoreData))
 	} else {
-		if err = terragenFileCreate(i.Path, terrgenGitIgnore); err != nil {
+		if err = terragenFileCreate(mainFile); err != nil {
 			return err
 		}
-		if err = ioutil.WriteFile(filepath.Join(i.Path, terrgenGitIgnore), gitIgnoreData, 0755); err != nil {
+		if err = ioutil.WriteFile(filepath.Join(i.Path, terrgenGitIgnore), gitIgnoreData, 0700); err != nil { //nolint:gosec
 			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terrgenGitIgnore, err)
 		}
 	}
