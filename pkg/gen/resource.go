@@ -70,6 +70,10 @@ func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 
 	i.createResource()
 
+	if err := i.updateProvider(); err != nil {
+		log.Fatal(ui.Error(fmt.Sprintf("updated provider '%s' errored with datasource '%s' with: %v", i.Provider, i.DataSource[0], err)))
+	}
+
 	if err := i.CreateOrUpdateMetadata(); err != nil {
 		log.Fatalf(ui.Error(fmt.Sprintf("oops creating/updating metadata errored out with %v", err)))
 	}

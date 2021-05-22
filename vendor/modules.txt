@@ -1,15 +1,17 @@
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
-# github.com/imdario/mergo v0.3.12
-github.com/imdario/mergo
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
+# github.com/jinzhu/copier v0.3.0
+github.com/jinzhu/copier
 # github.com/mattn/go-colorable v0.1.1
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.5
 github.com/mattn/go-isatty
 # github.com/nikhilsbhat/neuron v0.0.0-20191005183010-c891ed9d85ea
 github.com/nikhilsbhat/neuron/cli/ui
+# github.com/sergi/go-diff v1.2.0
+github.com/sergi/go-diff/diffmatchpatch
 # github.com/spf13/cobra v0.0.5
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.3

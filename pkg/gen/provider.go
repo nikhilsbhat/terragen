@@ -2,9 +2,11 @@
 package gen
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -12,8 +14,10 @@ import (
 	"path/filepath"
 	"reflect"
 
+	"github.com/jinzhu/copier"
 	"github.com/nikhilsbhat/neuron/cli/ui"
 	"github.com/nikhilsbhat/terragen/pkg/decode"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 )
 
@@ -294,7 +298,65 @@ func (i *Input) createOtherComponents() error {
 	return nil
 }
 
+func (i *Input) updateProvider() error {
+	currentProvider, err := ioutil.ReadFile(filepath.Join(i.Path, i.Provider, terragenProvider))
+	if err != nil {
+		return err
+	}
+
+	newIn := newInput()
+	if err = copier.CopyWithOption(newIn, i, copier.Option{IgnoreEmpty: true, DeepCopy: true}); err != nil {
+		return err
+	}
+
+	if err = newIn.getUpdatedResourceNDataSources(); err != nil {
+		return err
+	}
+
+	updateData, err := newIn.getUpdatedProviderData(currentProvider)
+	if err != nil {
+		return err
+	}
+
+	providerFile := filepath.Join(newIn.Path, newIn.Provider, terragenProvider)
+	if err = ioutil.WriteFile(providerFile, updateData, 0777); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (i *Input) getUpdatedProviderData(currentProvider []byte) ([]byte, error) {
+	var updatedProvider bytes.Buffer
+	tmpl := template.Must(template.New(terragenProvider).Parse(providerTemp))
+	if err := tmpl.Execute(&updatedProvider, i); err != nil {
+		return nil, err
+	}
+
+	dmp := diffmatchpatch.New()
+	providerDiff := dmp.DiffMain(string(currentProvider), updatedProvider.String(), false)
+	return []byte(dmp.DiffText2(providerDiff)), nil
+}
+
 func terragenWriter(path, file string) (*os.File, error) {
 	fileToBeWritten, err := os.Create(filepath.Join(path, file))
 	return fileToBeWritten, err
+}
+
+func (i *Input) getUpdatedResourceNDataSources() error {
+	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
+	metadata, err := i.getCurrentMetadata()
+	if err != nil {
+		return err
+	}
+	i.DataSource = append(i.DataSource, metadata.DataSources...)
+	i.Resource = append(i.Resource, metadata.Resources...)
+	return nil
+}
+
+func newMetadata() *Metadata {
+	return &Metadata{}
+}
+
+func newInput() *Input {
+	return &Input{}
 }
