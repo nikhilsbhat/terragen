@@ -2,10 +2,8 @@ package gen
 
 import (
 	"fmt"
-	"html/template"
-	"io"
+	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
@@ -22,15 +20,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func datasource_{{ (index .DataSource 0) }}() *schema.Resource {
+func datasource_{{ (index .DataSource .Index) }}() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasource_{{ (index .DataSource 0) }}Read,
+		ReadContext: datasource_{{ (index .DataSource .Index) }}Read,
 
 		Schema: map[string]*schema.Schema{},
 	}
 }
 
-func datasource_{{ (index .DataSource 0) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func datasource_{{ (index .DataSource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Your code goes here
 	return nil
 }
@@ -51,7 +49,9 @@ func (i *Input) CreateDataSource(cmd *cobra.Command, args []string) {
 		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for data_source '%s' was already generated\n\t use `terragen edit datasource` to edit one \n\t run `terragen edit datasource -h` for more info", i.DataSource[0])))
 	}
 
-	i.createDataSource()
+	if err := i.createDataSource(); err != nil {
+		log.Fatal(ui.Error(err.Error()))
+	}
 
 	if err := i.updateProvider(); err != nil {
 		log.Fatal(ui.Error(fmt.Sprintf("updated provider '%s' errored with datasource '%s' with: %v", i.Provider, i.DataSource[0], err)))
@@ -62,31 +62,39 @@ func (i *Input) CreateDataSource(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (i *Input) createDataSource() {
-	dataSourceFileName := fmt.Sprintf("datasource_%s.go", i.DataSource[0])
-	dataSourceFilePath := filepath.Join(i.Path, i.Provider)
+func (i *Input) createDataSource() error {
+	for index, dataSource := range i.DataSource {
+		dataSourceFileName := fmt.Sprintf("datasource_%s.go", dataSource)
+		dataSourceFilePath := filepath.Join(i.Path, i.Provider)
+		dataSourceFile := filepath.Join(dataSourceFilePath, dataSourceFileName)
 
-	log.Println(ui.Info(fmt.Sprintf("scaffolds for data-source '%s' would be generated under: '%s'", i.DataSource[0], dataSourceFilePath)))
+		log.Println(ui.Info(fmt.Sprintf("scaffolds for data-source '%s' would be generated under: '%s'", dataSource, dataSourceFilePath)))
 
-	var fileWriter io.Writer
-	if i.DryRun {
-		log.Println(ui.Info("contents of data source looks like"))
-		fileWriter = os.Stdout
-	} else {
-		file, err := terragenWriter(dataSourceFilePath, dataSourceFileName)
+		type datasoure struct {
+			*Input
+			Index int
+		}
+
+		data := &datasoure{i, index}
+
+		dataSourceData, err := renderTemplate(terragenDataSource, i.TemplateRaw.DataTemp, data)
 		if err != nil {
-			log.Fatalf("oops creating data source errored with: %v ", err)
+			return fmt.Errorf("oops rendering data_source %s errored with: %v ", dataSource, err)
 		}
-		defer file.Close()
-		fileWriter = file
-	}
 
-	if len(i.TemplateRaw.DataTemp) != 0 {
-		tmpl := template.Must(template.New(terragenDataSource).Parse(i.TemplateRaw.DataTemp))
-		if err := tmpl.Execute(fileWriter, i); err != nil {
-			log.Fatalf(ui.Error(fmt.Sprintf("oops scaffolding data_source %s errored with: %v ", i.DataSource, err)))
+		if i.DryRun {
+			log.Println(ui.Info("contents of data source looks like"))
+			fmt.Println(string(dataSourceData))
+		} else {
+			if err = terragenFileCreate(dataSourceFilePath, dataSourceFileName); err != nil {
+				return fmt.Errorf("oops creating data source errored with: %v ", err)
+			}
+			if err = ioutil.WriteFile(dataSourceFile, dataSourceData, 0755); err != nil {
+				return fmt.Errorf("oops scaffolding data_source %s errored with: %v ", dataSource, err)
+			}
 		}
 	}
+	return nil
 }
 
 func (i *Input) dataSourceScaffolded() bool {
@@ -97,8 +105,10 @@ func (i *Input) dataSourceScaffolded() bool {
 		return false
 	}
 
-	if contains(currentMetaData.DataSources, i.DataSource[0]) {
-		return true
+	for _, dataSource := range i.DataSource {
+		if contains(currentMetaData.DataSources, dataSource) {
+			return true
+		}
 	}
 	return false
 }

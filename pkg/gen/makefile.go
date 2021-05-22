@@ -2,35 +2,12 @@ package gen
 
 import (
 	"fmt"
-	"html/template"
-	"io"
+	"io/ioutil"
 	"log"
-	"os"
+	"path/filepath"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
 )
-
-func (i *Input) createMakefile() error {
-	var fileWriter io.Writer
-	if i.DryRun {
-		log.Print(ui.Info(fmt.Sprintf("Makefile would be created under %s", i.Path)))
-		fmt.Println(ui.Info("contents of Makefile source looks like"))
-		fileWriter = os.Stdout
-	} else {
-		file, err := terragenWriter(i.Path, terragenMakefile)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		fileWriter = file
-	}
-
-	tmpl := template.Must(template.New(terragenMakefile).Parse(makefileTemplate))
-	if err := tmpl.Execute(fileWriter, i); err != nil {
-		return err
-	}
-	return nil
-}
 
 const makefileTemplate = `
 GOFMT_FILES?=$$(find . -not -path "./vendor/*" -type f -name '*.go')
@@ -83,3 +60,24 @@ dev.prerequisite.up: ## Sets up the development environment with all necessary c
 generate.mock: ## generates mocks for the selected source packages.
 	@go generate ${SRC_PACKAGES}
 `
+
+func (i *Input) createMakefile() error {
+	makeFileData, err := renderTemplate(terragenMakefile, makefileTemplate, i)
+	if err != nil {
+		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terragenMakefile, err)
+	}
+
+	if i.DryRun {
+		log.Print(ui.Info(fmt.Sprintf("Makefile would be created under %s", i.Path)))
+		log.Println(ui.Info("contents of Makefile source looks like"))
+		fmt.Println(string(makeFileData))
+	} else {
+		if err = terragenFileCreate(i.Path, terragenMakefile); err != nil {
+			return err
+		}
+		if err = ioutil.WriteFile(filepath.Join(i.Path, terragenMakefile), makeFileData, 0755); err != nil {
+			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terragenMakefile, err)
+		}
+	}
+	return nil
+}

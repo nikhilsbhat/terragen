@@ -2,10 +2,8 @@ package gen
 
 import (
 	"fmt"
-	"html/template"
-	"io"
+	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
@@ -22,32 +20,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resource_{{ (index .Resource 0) }}() *schema.Resource {
+func resource_{{ (index .Resource .Index) }}() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resource_{{ (index .Resource 0) }}Create,
-		ReadContext:   resource_{{ (index .Resource 0) }}Read,
-		DeleteContext: resource_{{ (index .Resource 0) }}Delete,
-		UpdateContext: resource_{{ (index .Resource 0) }}Update,
+		CreateContext: resource_{{ (index .Resource .Index) }}Create,
+		ReadContext:   resource_{{ (index .Resource .Index) }}Read,
+		DeleteContext: resource_{{ (index .Resource .Index) }}Delete,
+		UpdateContext: resource_{{ (index .Resource .Index) }}Update,
 		Schema: map[string]*schema.Schema{},
 	}
 }
 
-func resource_{{ (index .Resource 0) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func resource_{{ (index .Resource .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func resource_{{ (index .Resource 0) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func resource_{{ (index .Resource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func resource_{{ (index .Resource 0) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func resource_{{ (index .Resource .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func resource_{{ (index .Resource 0) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func resource_{{ (index .Resource .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
@@ -68,7 +66,9 @@ func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for resource '%s' was already generated\n\t use `terragen edit resource` to edit one \n\t run `terragen edit resource -h` for more info", i.Resource[0])))
 	}
 
-	i.createResource()
+	if err := i.createResource(); err != nil {
+		log.Fatal(ui.Error(err.Error()))
+	}
 
 	if err := i.updateProvider(); err != nil {
 		log.Fatal(ui.Error(fmt.Sprintf("updated provider '%s' errored with datasource '%s' with: %v", i.Provider, i.DataSource[0], err)))
@@ -79,31 +79,39 @@ func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (i *Input) createResource() {
-	resourceFileName := fmt.Sprintf("resource_%s.go", i.Resource[0])
-	resourceFilePath := filepath.Join(i.Path, i.Provider)
+func (i *Input) createResource() error {
+	for index, currentResource := range i.Resource {
+		resourceFileName := fmt.Sprintf("resource_%s.go", currentResource)
+		resourceFilePath := filepath.Join(i.Path, i.Provider)
+		resourceFile := filepath.Join(resourceFilePath, resourceFileName)
 
-	log.Println(ui.Info(fmt.Sprintf("scaffolds for resource '%s' would be generated under: '%s'", i.Resource[0], resourceFilePath)))
+		log.Println(ui.Info(fmt.Sprintf("scaffolds for resource '%s' would be generated under: '%s'", currentResource, resourceFilePath)))
 
-	var fileWriter io.Writer
-	if i.DryRun {
-		log.Println(ui.Info("contents of resource looks like"))
-		fileWriter = os.Stdout
-	} else {
-		file, err := terragenWriter(resourceFilePath, resourceFileName)
+		type resource struct {
+			*Input
+			Index int
+		}
+
+		data := &resource{i, index}
+
+		resourceData, err := renderTemplate(terragenResource, i.TemplateRaw.ResourceTemp, data)
 		if err != nil {
-			log.Fatal(ui.Error(fmt.Sprintf("oops creating data source errored with: %v ", err)))
+			return fmt.Errorf("oops rendering resource %s errored with: %v ", currentResource, err)
 		}
-		defer file.Close()
-		fileWriter = file
-	}
 
-	if len(i.TemplateRaw.ResourceTemp) != 0 {
-		tmpl := template.Must(template.New(terragenResource).Parse(i.TemplateRaw.ResourceTemp))
-		if err := tmpl.Execute(fileWriter, i); err != nil {
-			log.Fatal(ui.Error(fmt.Sprintf("oops scaffolding resource %s errored with: %v ", i.Resource, err)))
+		if i.DryRun {
+			log.Println(ui.Info("contents of resource looks like"))
+			fmt.Println(string(resourceData))
+		} else {
+			if err = terragenFileCreate(resourceFilePath, resourceFileName); err != nil {
+				return fmt.Errorf("oops creating data source errored with: %v ", err)
+			}
+			if err = ioutil.WriteFile(resourceFile, resourceData, 0755); err != nil {
+				return fmt.Errorf("oops scaffolding data_source %s errored with: %v ", currentResource, err)
+			}
 		}
 	}
+	return nil
 }
 
 func (i *Input) resourceScaffolded() bool {
@@ -114,8 +122,10 @@ func (i *Input) resourceScaffolded() bool {
 		return false
 	}
 
-	if contains(currentMetaData.Resources, i.Resource[0]) {
-		return true
+	for _, resource := range i.Resource {
+		if contains(currentMetaData.Resources, resource) {
+			return true
+		}
 	}
 	return false
 }

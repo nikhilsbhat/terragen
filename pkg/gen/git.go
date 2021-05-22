@@ -1,10 +1,10 @@
 package gen
 
 import (
-	"html/template"
-	"io"
+	"fmt"
+	"io/ioutil"
 	"log"
-	"os"
+	"path/filepath"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
 	"gopkg.in/src-d/go-git.v4"
@@ -35,23 +35,21 @@ terraform.tfstate*
 
 // createGitIgnore scaffolds the provider and its components as per the requirements.
 func (i *Input) createGitIgnore() error {
-	var fileWriter io.Writer
-	if i.DryRun {
-		log.Println(ui.Info("contents of gitignore looks like"))
-		fileWriter = os.Stdout
-	} else {
-		file, err := terragenWriter(i.Path, terrgenGitIgnore)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		fileWriter = file
+	gitIgnoreData, err := renderTemplate(terrgenGitIgnore, i.TemplateRaw.GitIgnore, i)
+	if err != nil {
+		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terrgenGitIgnore, err)
 	}
 
-	if len(i.TemplateRaw.DataTemp) != 0 {
-		tmpl := template.Must(template.New(terrgenGitIgnore).Parse(i.TemplateRaw.GitIgnore))
-		if err := tmpl.Execute(fileWriter, i); err != nil {
+	if i.DryRun {
+		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terrgenGitIgnore, i.Path)))
+		log.Println(ui.Info("contents of gitignore looks like"))
+		fmt.Println(string(gitIgnoreData))
+	} else {
+		if err = terragenFileCreate(i.Path, terrgenGitIgnore); err != nil {
 			return err
+		}
+		if err = ioutil.WriteFile(filepath.Join(i.Path, terrgenGitIgnore), gitIgnoreData, 0755); err != nil {
+			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terrgenGitIgnore, err)
 		}
 	}
 
