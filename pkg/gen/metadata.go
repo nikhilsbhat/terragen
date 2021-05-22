@@ -77,11 +77,12 @@ func (i *Input) getCurrentMetadata() (*Metadata, error) {
 
 func (i *Input) getMetadata() *Metadata {
 	return &Metadata{
-		Provider:     i.Provider,
-		ProviderPath: i.Path,
-		Resources:    i.Resource,
-		DataSources:  i.DataSource,
-		Importers:    []string{i.Importer},
+		Provider:      i.Provider,
+		ProviderPath:  i.Path,
+		Resources:     i.Resource,
+		DataSources:   i.DataSource,
+		Importers:     []string{i.Importer},
+		ProjectModule: i.mod,
 	}
 }
 

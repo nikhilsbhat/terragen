@@ -7,4 +7,5 @@ const (
 	terragenMain       = "main.go"
 	terragenMakefile   = "Makefile"
 	terragenMetadata   = "terragen.yml"
+	terrgenGitIgnore   = ".gitignore"
 )

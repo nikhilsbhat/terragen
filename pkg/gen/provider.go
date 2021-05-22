@@ -58,7 +58,12 @@ type Input struct {
 	// Description to be added to resource/datasource
 	Description string
 	// DryRun simulates scaffold creation by not creating one
-	DryRun       bool
+	DryRun bool
+	// RepoGroup is used while creating go mod. Defaults to 'github.com/test/'
+	// For a given provider, repo group would be appended.
+	// Ex: For provider 'demo' the go mod would looks 'github.com/test/demo'
+	RepoGroup    string
+	mod          string
 	metaDataPath string
 }
 
@@ -72,6 +77,8 @@ type TerraTemplate struct {
 	DataTemp string `json:"data-template" yaml:"data-template"`
 	// ResourceTemp holds the template for resource
 	ResourceTemp string `json:"resource-template" yaml:"resource-template"`
+	// GitIgnore that where scaffolded.
+	GitIgnore string `json:"gitignore" yaml:"gitignore"`
 }
 
 // Metadata would be generated and stored by the utility for further references.
@@ -86,6 +93,8 @@ type Metadata struct {
 	DataSources []string `json:"data-sources" yaml:"data-sources"`
 	// Importers that where scaffolded.
 	Importers []string `json:"importers" yaml:"importers"`
+	// ProjectModule represents the module of the project
+	ProjectModule string `json:"project-module" yaml:"project-module"`
 }
 
 var (
@@ -138,7 +147,9 @@ func (i *Input) CreateProvider(cmd *cobra.Command, args []string) {
 	i.Path = i.getPath()
 	i.AutoGenMessage = autoGenMessage
 	i.Provider = args[0]
+	i.mod = i.setMod()
 
+	log.Println(ui.Info(fmt.Sprintf("go module for scaffold would be: %s", i.mod)))
 	if i.providerScaffolded() {
 		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was already generated\n\t use `terragen create -h` or `terragen edit -h` for more info", i.Provider)))
 	}
@@ -146,7 +157,7 @@ func (i *Input) CreateProvider(cmd *cobra.Command, args []string) {
 	log.Println(ui.Info(fmt.Sprintf("scaffolds for provider '%s' would be generated under: '%s'", i.Provider, i.Path)))
 
 	if i.Dependents == nil {
-		i.Dependents = []string{fmt.Sprintf("%s/%s", i.Provider, i.Provider), "github.com/hashicorp/terraform-plugin-sdk/v2/plugin"}
+		i.Dependents = []string{fmt.Sprintf("%s/%s", i.mod, i.Provider), "github.com/hashicorp/terraform-plugin-sdk/v2/plugin"}
 	}
 
 	if !i.DryRun {
@@ -177,7 +188,7 @@ func (i *Input) CreateProvider(cmd *cobra.Command, args []string) {
 	}
 
 	if err := i.createOtherComponents(); err != nil {
-		log.Fatalf(ui.Error(err.Error()))
+		log.Fatal(ui.Error(err.Error()))
 	}
 
 	// Setup the project to make it ready for development
@@ -223,6 +234,7 @@ func (i *Input) getTemplate() {
 		i.TemplateRaw.ProviderTemp = providerTemp
 		i.TemplateRaw.DataTemp = dataSourceTemp
 		i.TemplateRaw.ResourceTemp = resourceTemp
+		i.TemplateRaw.GitIgnore = gitignore
 	}
 }
 
@@ -259,7 +271,7 @@ func (i *Input) setDefaults() {
 }
 
 func (i *Input) setupTerragen() error {
-	goInit := exec.Command("go", "mod", "init", i.Provider) //nolint:gosec
+	goInit := exec.Command("go", "mod", "init", i.mod) //nolint:gosec
 	goInit.Dir = i.Path
 	if err := goInit.Run(); err != nil {
 		return err
@@ -294,6 +306,10 @@ func (i *Input) createOtherComponents() error {
 
 	if err := i.createMakefile(); err != nil {
 		return err
+	}
+
+	if err := i.createGitIgnore(); err != nil {
+		log.Fatalf(ui.Error(err.Error()))
 	}
 	return nil
 }
@@ -351,6 +367,13 @@ func (i *Input) getUpdatedResourceNDataSources() error {
 	i.DataSource = append(i.DataSource, metadata.DataSources...)
 	i.Resource = append(i.Resource, metadata.Resources...)
 	return nil
+}
+
+func (i *Input) setMod() string {
+	if len(i.RepoGroup) == 0 {
+		i.RepoGroup = i.Provider
+	}
+	return fmt.Sprintf("%s/terraform-provider-%s", i.RepoGroup, i.Provider)
 }
 
 func newMetadata() *Metadata {

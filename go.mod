@@ -9,5 +9,6 @@ require (
 	github.com/sergi/go-diff v1.2.0
 	github.com/spf13/cobra v0.0.5
 	golang.org/x/sys v0.0.0-20190804053845-51ab0e2deafa // indirect
+	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.3.0
 )
