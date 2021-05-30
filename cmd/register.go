@@ -47,39 +47,39 @@ func (c *terragenCommands) prepareCommands() *cobra.Command {
 }
 
 func getRootCommand() *cobra.Command {
-	rootCmnd := &cobra.Command{
+	rootCommand := &cobra.Command{
 		Use:   "terragen [command]",
 		Short: "Utility that helps in generating scaffolds for terraform provider",
-		Long:  `Terragen helps user to create custom terraform provider and its components by generating scaffolds for them.`,
+		Long:  `Terragen helps user to create custom terraform provider and its components by generating scaffolds.`,
 		Args:  cobra.MinimumNArgs(1),
 		RunE:  cm.echoTerragen,
 	}
-	rootCmnd.SetUsageTemplate(getUsageTemplate())
-	return rootCmnd
+	rootCommand.SetUsageTemplate(getUsageTemplate())
+	return rootCommand
 }
 
 func getCreateCommand() *cobra.Command {
-	createCmnd := &cobra.Command{
-		Use:   "create [flags]",
-		Short: "Command to scaffold provider and other components of terraform provider",
-		Long:  `This will help user to generate the initial components of terraform provider.`,
-		//Run:          genin.CreateProvider,
+	createCommand := &cobra.Command{
+		Use:          "create [command] [flags]",
+		Short:        "Command to scaffold provider and other components of terraform provider",
+		Long:         `This will help user to generate the initial components of terraform provider.`,
 		SilenceUsage: true,
+		RunE:         cm.echoTerragen,
 	}
-	registerFlags("create", createCmnd)
+	registerFlags("create", createCommand)
 	for _, command := range createCommands {
-		createCmnd.AddCommand(command)
+		createCommand.AddCommand(command)
 	}
-	return createCmnd
+	return createCommand
 }
 
 func getEditCommand() *cobra.Command {
 	editCommand := &cobra.Command{
-		Use:   "edit [flags]",
-		Short: "Command to edit the scaffold created for a provider",
-		Long:  `This will help user to edit the scaffolds generated for terraform provider and other components of them.`,
-		//Run:          genin.Pr,
+		Use:          "edit [command] [flags]",
+		Short:        "Command to edit the scaffold created for a provider",
+		Long:         `This will help user to edit the scaffolds generated for terraform provider and other components of them.`,
 		SilenceUsage: true,
+		RunE:         cm.echoTerragen,
 	}
 	registerFlags("edit", editCommand)
 	for _, command := range editCommands {
@@ -131,13 +131,17 @@ func createRegister(name string, flagsRequired bool, fn *cobra.Command) {
 	createCommands[name] = fn
 }
 
-func editRegister(name string, fn *cobra.Command) {
+func editRegister(name string, flagsRequired bool, fn *cobra.Command) {
 	if editCommands == nil {
 		editCommands = make(map[string]*cobra.Command)
 	}
 
 	if editCommands[name] != nil {
 		panic(fmt.Sprintf("Command %s is already registered", name))
+	}
+
+	if flagsRequired {
+		registerFlags(name, fn)
 	}
 	editCommands[name] = fn
 }
