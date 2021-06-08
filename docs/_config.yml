@@ -1,0 +1,31 @@
+remote_theme: pmarsceill/just-the-docs
+theme: just-the-docs
+title: terragen
+heading_anchors: true
+back_to_top: true
+back_to_top_text: "Go Back to top"
+url: "https://nikhilsbhat.github.io/"
+permalink: pretty
+
+search:
+  heading_level: 2
+  previews: 3
+  preview_words_before: 2
+  preview_words_after: 3
+  rel_url: false
+  button: true
+  tokenizer_separator: /[\s\-/]+/
+
+
+aux_links:
+  "terragen on GitHub":
+    - "//github.com/nikhilsbhat/terragen"
+aux_links_new_tab: true
+
+footer_content: "Copyright &copy; 2020-2021 Nikhil Bhat. Distributed by an <a href=\"https://github.com/nikhilsbhat/terragen/blob/master/LICENSE\">MIT license.</a>"
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub."
+gh_edit_repository: "https://github.com/nikhilsbhat/terragen"
+gh_edit_branch: "master"
+gh_edit_source: docs
+gh_edit_view_mode: "tree"

@@ -67,6 +67,7 @@ run:
   skip-dirs:
     - scripts/
     - vendor/
+    - docs/
 
   skip-files:
     - Makefile

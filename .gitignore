@@ -6,3 +6,9 @@ terragen.yml
 vendor/
 .idea/
 dist/
+
+
+# dropping locally generated static doc pages
+_site/
+docs/Gemfile.lock
+.jekyll-metadata

@@ -16,7 +16,7 @@ func initCommands() {
 	createRegister("datasource", true, &cobra.Command{
 		Use:          "datasource [args] [flags]",
 		Short:        "Command to generate scaffolds for datasource",
-		Long:         `This will help user to generate scaffolds for datasource for the chosen provider.`,
+		Long:         `This will help user to generate scaffolds for datasource of chosen provider.`,
 		Run:          genin.CreateDataSource,
 		Args:         cobra.MinimumNArgs(1),
 		SilenceUsage: true,
@@ -25,7 +25,7 @@ func initCommands() {
 	createRegister("resource", true, &cobra.Command{
 		Use:          "resource [args] [flags]",
 		Short:        "Command to generate scaffolds for resource",
-		Long:         `This will help user to generate scaffolds for resource for the chosen provider.`,
+		Long:         `This will help user to generate scaffolds for resource of chosen provider.`,
 		Run:          genin.CreateResource,
 		Args:         cobra.MinimumNArgs(1),
 		SilenceUsage: true,

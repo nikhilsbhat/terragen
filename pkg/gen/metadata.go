@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/nikhilsbhat/terragen/pkg/decode"
+	"github.com/nikhilsbhat/terragen/version"
 	"gopkg.in/yaml.v2"
 )
 
@@ -77,6 +78,8 @@ func (i *Input) getCurrentMetadata() (*Metadata, error) {
 
 func (i *Input) getMetadata() *Metadata {
 	return &Metadata{
+		Version:       version.Version,
+		RepoGroup:     i.RepoGroup,
 		Provider:      i.Provider,
 		ProviderPath:  i.Path,
 		Resources:     i.Resource,

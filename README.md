@@ -1,83 +1,40 @@
 # terragen
 
-
 [![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE) [![shields](https://godoc.org/github.com/nikhilsbhat/terragen?status.svg)](https://godoc.org/github.com/nikhilsbhat/terragen)
 
-
-An utility that generates scaffolds for building custom [Terraform](https://www.terraform.io/) providers.
+A utility to ease the development of [terraform](https://www.terraform.io/) custom provider by generating scaffolds for provider and their components.
 
 ## Introduction
 
-Terraform is one of the best software available to automate infrastructure and no procrastination in accepting that.
+Terraform is one of the best software available to automate infrastructure and no procrastination in accepting this fact.<br><br>
+How about extending Terraform?. It would be great when we try solving complexity that is project-specific, and Terraform offers the same feature in the form of a [custom provider](https://www.terraform.io/docs/extend/how-terraform-works.html). How to create one such provider? They have well [documented](https://www.terraform.io/docs/extend/writing-custom-providers.html) steps for it.<br><br>
+How about accelerating the development of such custom-provider with the scaffolds? `Terragen` helps here. It generates scaffolds for `provider`, `resources`, and `data_sources` that eases the development of the custom provider.<br><br>
+Supports the addition of new scaffolds of `data_source` and `resource` for a specific Terraform `provider` as and when required.  
+## Requirements
 
-How about extending Terraform? this would be great when we are solving a complexity that are project specific. And Terraform has the same feature in the form of [custom-provider](https://www.terraform.io/docs/extend/how-terraform-works.html). How to create one such provider? they have well [documented](https://www.terraform.io/docs/extend/writing-custom-providers.html) steps for it.
-
-How about creating initial/basic things with single command? terragen addresses the same. It generates the templates which eases the development of the custom-provider
-
-## Requires
-
-* Since there are no prebuilt libraries of Terragen available, it expected that [go](https://golang.org/dl/) to be pre installed on the machine to build one. Installing go can be found [here](https://golang.org/doc/install).
-* Understanding of how to build [custom-provider](https://www.terraform.io/docs/extend/writing-custom-providers.html) for terraform.
+* [Go](https://golang.org/dl/) 1.12 or above . Installing go can be found [here](https://golang.org/doc/install).
+* Basic understanding of terraform provider and [building](https://www.terraform.io/docs/extend/writing-custom-providers.html) them.
 
 ## Installation
 
-```shell
-go get -u github.com/nikhilsbhat/terragen
-go build
-```
-Use the executable just like any other go-cli application.
+* Recommend installing released versions. Release binaries are available on the [releases](https://github.com/nikhilsbhat/terragen/releases) page.
+* Can always build it locally by running `go build` against cloned repo.
 
-Found some of the codes useful for you? then start using it by importing the package in your line of codes.
-```golang
-package main
+## Features supported by the `Terragen` at the moment.
 
-import (
-    "github.com/nikhilsbhat/terragen"
-)
-```
+|  component   |    create  |     edit     |  delete  |
+| :----------: | :--------: | :----------: | :------: |
+| `provider`   | yes        | yes (beta)   | no       |
+| `data_source`| yes        | yes (beta)   | no       |
+| `resource`   | yes        | yes (beta)   | no       |
+| `importer`   | no         | no           | no       |
 
-### terragen commands
+## Documentation
 
-```bash
-terragen [command] [flags]
-```
-Make sure appropriate command is used for the actions, to check the available commands and flags use `terragen --help`
+* Document of `Terragen` on its usage is up [here](https://nikhilsbhat.github.io/terragen).
 
-```bash
-Terragen helps user to create custom terraform provider by generating templates for it.
-
-Usage:
-  terragen [command] [flags]
-
-Available Commands:
-  generate    command to generate the initial components for terraform provider
-  help        Help about any command
-  version     command to fetch the version of terragen installed
-
-Flags:
-  -h, --help          help for terragen
-  -n, --name string   name of the provider that needs templates
-  -p, --path string   path where the templates has to be generated
-
-Use "terragen [command] --help" for more information about a command."
-```
-
-### `terragen generate`
-
-The command `generate` helps in generating the provider templates which can be enhanced.
-
-```bash
-terragen generate
-```
-
-Pass the required falgs to generate the templates in the required location and with the proper name. If not, it defaults to working directory with the previder name `demo` just like above command.
-
-```bash
-terragen generate -n demo -p ~/terraform/demo/
-```
+## TODO
+* [ ] Edit feature to cover more aspect.
+* [ ] Test cases.
 
 **Note** `terragen generate` just creates the templates not the whole provider.
-
-## Limitations
-
-Currently it just creates basic templates, more features to be added to make it generate fully working provider.
