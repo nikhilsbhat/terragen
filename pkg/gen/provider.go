@@ -80,7 +80,7 @@ type TerraTemplate struct {
 // Metadata would be generated and stored by the utility for further references.
 type Metadata struct {
 	// Version of terragen used for generating scaffolds. Updates only when higher version of terragen used.
-	Version   string `json:"version" yaml:"version"`
+	Version string `json:"version" yaml:"version"`
 	// RepoGroup to which the project is part of.
 	RepoGroup string `json:"repo-group" yaml:"repo-group"`
 	// ProjectModule represents the module of the project

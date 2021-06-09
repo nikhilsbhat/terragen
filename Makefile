@@ -54,10 +54,10 @@ docker.login: ## Establishes the connection to the docker registry
 docker.publish.image: docker_login ## Publisies the image to the registered docker registry.
 	docker push ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
 
-coverage.lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
+lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
 	if [ -z "${DEV}" ]; then golangci-lint run --color always ; else docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.31-alpine golangci-lint run --color always ; fi
 
-coverage.report: ## Publishes the go-report of the appliction (uses go-reportcard)
+report: ## Publishes the go-report of the appliction (uses go-reportcard)
 	if [ -z "${DEV}" ]; then goreportcard-cli -v ; else docker run --rm -v $(APP_DIR):/app -w /app basnik/goreportcard-cli:latest goreportcard-cli -v ; fi
 
 dev.prerequisite.up: ## Sets up the development environment with all necessary components.
@@ -67,9 +67,6 @@ dev.prerequisite.purge: ## Teardown the development environment by removing all 
 
 install.hooks: ## install pre-push hooks for the repository.
 	${APP_DIR}/scripts/hook.sh ${APP_DIR}
-
-print.source: ## prints the source packages from which the mocks would be generated.
-	echo ${SRC_PACKAGES}
 
 generate.mock: ## generates mocks for the selected source packages.
 	@go generate ${SRC_PACKAGES}
