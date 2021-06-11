@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/nikhilsbhat/terragen/pkg/decode"
+	"github.com/nikhilsbhat/terragen/pkg/utils"
 	"github.com/nikhilsbhat/terragen/version"
 	"gopkg.in/yaml.v2"
 )
@@ -29,13 +30,13 @@ func (i *Input) CreateOrUpdateMetadata() error {
 		if newMetaData.Provider != currentMetaData.Provider {
 			return fmt.Errorf("renaming provider is not supported once scaffolds are created")
 		}
-		if hasChange(currentMetaData.Resources, newMetaData.Resources) {
+		if utils.HasChange(currentMetaData.Resources, newMetaData.Resources) {
 			currentMetaData.Resources = append(currentMetaData.Resources, newMetaData.Resources...)
 		}
-		if hasChange(currentMetaData.DataSources, newMetaData.DataSources) {
+		if utils.HasChange(currentMetaData.DataSources, newMetaData.DataSources) {
 			currentMetaData.DataSources = append(currentMetaData.DataSources, newMetaData.DataSources...)
 		}
-		if hasChange(currentMetaData.Importers, newMetaData.Importers) {
+		if utils.HasChange(currentMetaData.Importers, newMetaData.Importers) {
 			currentMetaData.Importers = append(currentMetaData.Importers, newMetaData.Importers...)
 		}
 		metadata = currentMetaData

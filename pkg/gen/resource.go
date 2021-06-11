@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
+	"github.com/nikhilsbhat/terragen/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -57,6 +58,13 @@ func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 	i.AutoGenMessage = autoGenMessage
 	i.Path = i.getPath()
 	i.getTemplate()
+
+	//if oldVer, newVer, lock, err := i.lockTerragenExecution(); lock == true {
+	//	if err != nil {
+	//		log.Fatalf(ui.Error(err.Error()))
+	//	}
+	//	log.Fatalf("terragen version %v or greater is required\n cannot scaffold more with terragen version '%v', it breaks the project", oldVer, newVer)
+	//}
 
 	if !i.providerScaffolded() {
 		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was not generated earlier\n\t use"+
@@ -125,7 +133,7 @@ func (i *Input) resourceScaffolded() bool {
 	}
 
 	for _, resource := range i.Resource {
-		if contains(currentMetaData.Resources, resource) {
+		if utils.Contains(currentMetaData.Resources, resource) {
 			return true
 		}
 	}

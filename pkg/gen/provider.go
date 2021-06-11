@@ -144,11 +144,19 @@ func Provider() *schema.Provider {
 func (i *Input) CreateProvider(cmd *cobra.Command, args []string) {
 	i.setDefaults()
 	i.getTemplate()
+	i.enrichNames()
 	i.Path = i.getPath()
 	i.AutoGenMessage = autoGenMessage
 	i.Provider = args[0]
 	i.mod = i.setMod()
 	provideFile := filepath.Join(i.Path, i.Provider, terragenProvider)
+
+	//if oldVer, newVer, lock, err := i.lockTerragenExecution(); lock == true {
+	//	if err != nil {
+	//		log.Fatalf(ui.Error(err.Error()))
+	//	}
+	//	log.Fatalf("terragen version %v or greater is required\n cannot scaffold more with terragen version '%v', it breaks the project", oldVer, newVer)
+	//}
 
 	log.Println(ui.Info(fmt.Sprintf("go module for scaffold would be: %s", i.mod)))
 	if i.providerScaffolded() {
@@ -290,22 +298,4 @@ func (i *Input) getUpdatedProviderData(currentProvider []byte) ([]byte, error) {
 	dmp := diffmatchpatch.New()
 	providerDiff := dmp.DiffMain(string(currentProvider), updatedProvider.String(), false)
 	return []byte(dmp.DiffText2(providerDiff)), nil
-}
-
-func (i *Input) getUpdatedResourceNDataSources() error {
-	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
-	metadata, err := i.getCurrentMetadata()
-	if err != nil {
-		return err
-	}
-	i.DataSource = append(i.DataSource, metadata.DataSources...)
-	i.Resource = append(i.Resource, metadata.Resources...)
-	return nil
-}
-
-func (i *Input) setMod() string {
-	if len(i.RepoGroup) == 0 {
-		i.RepoGroup = i.Provider
-	}
-	return fmt.Sprintf("%s/terraform-provider-%s", i.RepoGroup, i.Provider)
 }

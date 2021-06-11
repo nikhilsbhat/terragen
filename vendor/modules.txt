@@ -1,3 +1,5 @@
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
 # github.com/emirpasic/gods v1.12.0
 github.com/emirpasic/gods/containers
 github.com/emirpasic/gods/lists
@@ -23,6 +25,8 @@ github.com/mattn/go-isatty
 github.com/mitchellh/go-homedir
 # github.com/nikhilsbhat/neuron v0.0.0-20191005183010-c891ed9d85ea
 github.com/nikhilsbhat/neuron/cli/ui
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
 # github.com/sergi/go-diff v1.2.0
 github.com/sergi/go-diff/diffmatchpatch
 # github.com/spf13/cobra v0.0.5
@@ -34,6 +38,8 @@ github.com/src-d/gcfg
 github.com/src-d/gcfg/scanner
 github.com/src-d/gcfg/token
 github.com/src-d/gcfg/types
+# github.com/stretchr/testify v1.4.0
+github.com/stretchr/testify/assert
 # github.com/xanzy/ssh-agent v0.2.1
 github.com/xanzy/ssh-agent
 # golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
