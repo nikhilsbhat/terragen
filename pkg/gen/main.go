@@ -35,7 +35,7 @@ func (i *Input) CreateMain() error {
 	if i.DryRun {
 		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terragenMain, i.Path)))
 		log.Println(ui.Info("contents of main.go looks like"))
-		fmt.Println(string(mainData))
+		printData(mainData)
 	} else {
 		if err = terragenFileCreate(mainFile); err != nil {
 			return err

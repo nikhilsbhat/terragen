@@ -1,9 +1,13 @@
 package gen
 
 import (
+	"io/ioutil"
 	"testing"
 
+	"github.com/nikhilsbhat/terragen/version"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v2"
 )
 
 func TestInput_enrichNames(t *testing.T) {
@@ -36,15 +40,44 @@ func TestInput_setMod(t *testing.T) {
 }
 
 func TestInput_lockTerragenExecution(t *testing.T) {
-	input := Input{
-		Resource:   []string{"hashicups_order"},
-		DataSource: []string{"hashicups_ingredients", "hashicups_coffees"},
+	t.Run("Should lock the execution of terragen due to version issues", func(t *testing.T) {
+		oldTerragenVersion := "1.0.0"
+		newTerragenVersion := "0.2.0"
+		version.Version = newTerragenVersion
+		metadataFromFile, err := mockGetMetadata("fixtures/terragen.yml")
+		require.NoError(t, err)
+
+		oldVersion, newVersion, lock, err := lockTerragenExecution(metadataFromFile.Version)
+		require.NoError(t, err)
+		assert.Equal(t, true, lock)
+		assert.Equal(t, newTerragenVersion, newVersion)
+		assert.Equal(t, oldTerragenVersion, oldVersion)
+	})
+	t.Run("Should not lock the execution of terragen", func(t *testing.T) {
+		oldTerragenVersion := "1.0.0"
+		newTerragenVersion := "1.2.0"
+		version.Version = newTerragenVersion
+		metadataFromFile, err := mockGetMetadata("fixtures/terragen-test.yml")
+		require.NoError(t, err)
+
+		oldVersion, newVersion, lock, err := lockTerragenExecution(metadataFromFile.Version)
+		require.NoError(t, err)
+		assert.Equal(t, false, lock)
+		assert.Equal(t, newTerragenVersion, newVersion)
+		assert.Equal(t, oldTerragenVersion, oldVersion)
+	})
+}
+
+func mockGetMetadata(path string) (*Metadata, error) {
+	metaData, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
 	}
 
-	_, _, lock, err := input.lockTerragenExecution()
-	expected := true
-	assert.NotNil(t, err)
-	assert.Equal(t, expected, lock)
-	//assert.NotNil(t, oldVer)
-	//assert.NotNil(t, newVer)
+	metadata := newMetadata()
+	if yamlErr := yaml.Unmarshal(metaData, &metadata); yamlErr != nil {
+		return nil, yamlErr
+	}
+
+	return metadata, nil
 }

@@ -9,6 +9,8 @@ github.com/emirpasic/gods/trees/binaryheap
 github.com/emirpasic/gods/utils
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
+# github.com/hashicorp/go-version v0.0.0-20160119211326-7e3c02b30806
+github.com/hashicorp/go-version
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
 # github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99
@@ -40,6 +42,7 @@ github.com/src-d/gcfg/token
 github.com/src-d/gcfg/types
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
 # github.com/xanzy/ssh-agent v0.2.1
 github.com/xanzy/ssh-agent
 # golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4

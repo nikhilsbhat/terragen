@@ -2,10 +2,10 @@ package gen
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
-	"strconv"
+	"strings"
 
+	goVersion "github.com/hashicorp/go-version"
 	"github.com/nikhilsbhat/terragen/version"
 )
 
@@ -47,36 +47,50 @@ func (i *Input) enrichNames() {
 	}
 }
 
-func (i *Input) lockTerragenExecution() (old, new float64, lock bool, err error) {
-	runnigTerragenVersion, err := getTerragenVersion(version.Version)
-	if err != nil {
-		return 0, runnigTerragenVersion, true, err
+func (i *Input) snakeCaseToCamelCase(input string) (camelCase string) {
+	isToUpper := false
+	for k, v := range input {
+		if k == 0 {
+			camelCase = strings.ToUpper(string(input[0]))
+		} else {
+			if isToUpper {
+				camelCase += strings.ToUpper(string(v))
+				isToUpper = false
+			} else {
+				if v == '_' {
+					isToUpper = true
+				} else {
+					camelCase += string(v)
+				}
+			}
+		}
 	}
-	log.Printf("current version %s", runnigTerragenVersion)
-
-	metadata, err := i.getCurrentMetadata()
-	if err != nil || len(metadata.Version) == 0 {
-		return 0, runnigTerragenVersion, true, err
-	}
-	log.Printf("old version %s", metadata.Version)
-
-	oldTerragenVersion, err := getTerragenVersion(metadata.Version)
-	if err != nil {
-		return oldTerragenVersion, runnigTerragenVersion, true, err
-	}
-
-	log.Printf("old version %s", oldTerragenVersion)
-	if runnigTerragenVersion < oldTerragenVersion {
-		return oldTerragenVersion, runnigTerragenVersion, true, nil
-	}
-	return oldTerragenVersion, runnigTerragenVersion, false, nil
+	return
 }
 
-func getTerragenVersion(v string) (float64, error) {
-	fmt.Println(v)
-	ver, err := strconv.ParseFloat(v, 64)
-	if err != nil {
-		return 0, err
+func lockTerragenExecution(currentVersion string) (old, new string, lock bool, err error) {
+	terragenVersionUnkown := "unknown-version"
+
+	if len(currentVersion) == 0 {
+		return terragenVersionUnkown, terragenVersionUnkown, true, err
 	}
-	return ver, nil
+
+	runnigTerragenVersion, err := goVersion.NewVersion(version.GetBuildInfo().Version)
+	if err != nil {
+		return terragenVersionUnkown, terragenVersionUnkown, true, err
+	}
+
+	oldTerragenVersion, err := goVersion.NewVersion(currentVersion)
+	if err != nil {
+		return terragenVersionUnkown, runnigTerragenVersion.String(), true, err
+	}
+
+	if runnigTerragenVersion.LessThan(oldTerragenVersion) {
+		return oldTerragenVersion.String(), runnigTerragenVersion.String(), true, nil
+	}
+	return oldTerragenVersion.String(), runnigTerragenVersion.String(), false, nil
+}
+
+func printData(data []byte) {
+	fmt.Println(string(data))
 }

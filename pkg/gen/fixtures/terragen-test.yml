@@ -1,0 +1,13 @@
+version: "1.0"
+repo-group: github.com/nikhilsbhat
+project-module: github.com/nikhilsbhat/terraform-provider-hashicups
+provider: hashicups
+provider-path: path/to/terraform-provider-test
+resources:
+  - resource_hashicups_order
+data-sources:
+  - datasource_hashicups_coffees
+  - datasource_hashicups_ingredients
+  - datasource_hashicups_order
+importers:
+  - ""

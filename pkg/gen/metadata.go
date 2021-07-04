@@ -2,7 +2,6 @@ package gen
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -15,10 +14,6 @@ import (
 func (i *Input) CreateOrUpdateMetadata() error {
 	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
 
-	if i.DryRun {
-		log.Print(fmt.Sprintf("metadata would be generated under %s", i.metaDataPath))
-		return nil
-	}
 	var metadata *Metadata
 	if i.scaffoldStatus() {
 		currentMetaData, err := i.getCurrentMetadata()

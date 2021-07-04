@@ -21,32 +21,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resource_{{ (index .Resource .Index) }}() *schema.Resource {
+func {{ .snakeCaseToCamelCase (index .Resource .Index) }}() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resource_{{ (index .Resource .Index) }}Create,
-		ReadContext:   resource_{{ (index .Resource .Index) }}Read,
-		DeleteContext: resource_{{ (index .Resource .Index) }}Delete,
-		UpdateContext: resource_{{ (index .Resource .Index) }}Update,
+		CreateContext: {{ .snakeCaseToCamelCase (index .Resource .Index) }}Create,
+		ReadContext:   {{ .snakeCaseToCamelCase (index .Resource .Index) }}Read,
+		DeleteContext: {{ .snakeCaseToCamelCase (index .Resource .Index) }}Delete,
+		UpdateContext: {{ .snakeCaseToCamelCase (index .Resource .Index) }}Update,
 		Schema: map[string]*schema.Schema{},
 	}
 }
 
-func resource_{{ (index .Resource .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ .snakeCaseToCamelCase (index .Resource .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func resource_{{ (index .Resource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ .snakeCaseToCamelCase (index .Resource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func resource_{{ (index .Resource .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ .snakeCaseToCamelCase (index .Resource .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func resource_{{ (index .Resource .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ .snakeCaseToCamelCase (index .Resource .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
@@ -56,15 +56,10 @@ func resource_{{ (index .Resource .Index) }}Update(ctx context.Context, d *schem
 func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 	i.Resource = args
 	i.AutoGenMessage = autoGenMessage
+	i.enrichNames()
 	i.Path = i.getPath()
+	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
 	i.getTemplate()
-
-	//if oldVer, newVer, lock, err := i.lockTerragenExecution(); lock == true {
-	//	if err != nil {
-	//		log.Fatalf(ui.Error(err.Error()))
-	//	}
-	//	log.Fatalf("terragen version %v or greater is required\n cannot scaffold more with terragen version '%v', it breaks the project", oldVer, newVer)
-	//}
 
 	if !i.providerScaffolded() {
 		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was not generated earlier\n\t use"+
@@ -74,6 +69,19 @@ func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 	if i.resourceScaffolded() {
 		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for resource '%s' was already generated\n\t use"+
 			" `terragen edit resource` to edit one \n\t run `terragen edit resource -h` for more info", i.Resource[0])))
+	}
+
+	metadata, err := i.getCurrentMetadata()
+	if err != nil {
+		log.Fatalf(ui.Error(err.Error()))
+	}
+
+	if oldVer, newVer, lock, err := lockTerragenExecution(metadata.Version); lock {
+		if err != nil {
+			log.Fatalf(ui.Error(err.Error()))
+		}
+		log.Fatalf("terragen version %v or greater is required\n cannot scaffold more with terragen version '%v', "+
+			"it breaks the project", oldVer, newVer)
 	}
 
 	if err := i.createResource(); err != nil {
@@ -91,9 +99,8 @@ func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 
 func (i *Input) createResource() error {
 	for index, currentResource := range i.Resource {
-		resourceFileName := fmt.Sprintf("resource_%s.go", currentResource)
 		resourceFilePath := filepath.Join(i.Path, i.Provider)
-		resourceFile := filepath.Join(resourceFilePath, resourceFileName)
+		resourceFile := filepath.Join(resourceFilePath, fmt.Sprintf("%s.go", currentResource))
 
 		log.Println(ui.Info(fmt.Sprintf("scaffolds for resource '%s' would be generated under: '%s'", currentResource, resourceFilePath)))
 
@@ -111,7 +118,7 @@ func (i *Input) createResource() error {
 
 		if i.DryRun {
 			log.Println(ui.Info("contents of resource looks like"))
-			fmt.Println(string(resourceData))
+			printData(resourceData)
 		} else {
 			if err = terragenFileCreate(resourceFile); err != nil {
 				return fmt.Errorf("oops creating resource errored with: %v ", err)
@@ -125,7 +132,6 @@ func (i *Input) createResource() error {
 }
 
 func (i *Input) resourceScaffolded() bool {
-	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
 	currentMetaData, err := i.getCurrentMetadata()
 	if err != nil {
 		log.Println(ui.Error(err.Error()))

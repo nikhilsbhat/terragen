@@ -44,7 +44,7 @@ func (i *Input) createGitIgnore() error {
 	if i.DryRun {
 		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terrgenGitIgnore, i.Path)))
 		log.Println(ui.Info("contents of gitignore looks like"))
-		fmt.Println(string(gitIgnoreData))
+		printData(gitIgnoreData)
 	} else {
 		if err = terragenFileCreate(mainFile); err != nil {
 			return err

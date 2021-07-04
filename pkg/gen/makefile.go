@@ -36,22 +36,10 @@ local.push: local.build ## Pushes built artifact to the specified location
 local.run: local.build ## Generates the artifact and start the service in the current directory
 	./${APP_NAME}
 
-dockerise: local.check ## Containerise the appliction
-	docker build . --tag ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
-
-docker.lint: ## Linting Dockerfile for
-	docker run --rm -v $(APP_DIR):/app -w /app hadolint/hadolint:latest-alpine hadolint Dockerfile
-
-docker.login: ## Establishes the connection to the docker registry
-	docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWD} ${DOCKER_REPO}
-
-docker.publish.image: docker_login ## Publisies the image to the registered docker registry.
-	docker push ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
-
-coverage.lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
+lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
 	docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.31-alpine golangci-lint run --color always
 
-coverage.report: ## Publishes the go-report of the appliction (uses go-reportcard)
+report: ## Publishes the go-report of the appliction (uses go-reportcard)
 	docker run --rm -v $(APP_DIR):/app -w /app basnik/goreportcard-cli:latest goreportcard-cli -v
 
 dev.prerequisite.up: ## Sets up the development environment with all necessary components.
@@ -71,7 +59,7 @@ func (i *Input) createMakefile() error {
 	if i.DryRun {
 		log.Print(ui.Info(fmt.Sprintf("Makefile would be created under %s", i.Path)))
 		log.Println(ui.Info("contents of Makefile source looks like"))
-		fmt.Println(string(makeFileData))
+		printData(makeFileData)
 	} else {
 		if err = terragenFileCreate(makeFile); err != nil {
 			return err
