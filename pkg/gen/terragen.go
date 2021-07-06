@@ -93,7 +93,7 @@ func (i *Input) getPath() string {
 
 func renderTemplate(templateName, temp string, data interface{}) ([]byte, error) {
 	var templateWriter bytes.Buffer
-	tmpl := template.Must(template.New(templateName).Parse(temp))
+	tmpl := template.Must(template.New(templateName).Funcs(toCamel).Parse(temp))
 	if err := tmpl.Execute(&templateWriter, data); err != nil {
 		return nil, err
 	}

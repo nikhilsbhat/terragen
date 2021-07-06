@@ -2,9 +2,7 @@
 package gen
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
@@ -112,13 +110,13 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 		{{- range $resource := .Resource }}
-			"{{ $resource }}": {{ .snakeCaseToCamelCase $resource }}(),
+			"{{ $resource }}": {{ toCamel $resource }}(),
 		{{- end }}
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
 		{{- range $datasource := .DataSource }}
-			"{{ $datasource }}": {{ .snakeCaseToCamelCase $datasource }}(),
+			"{{ $datasource }}": {{ toCamel $datasource }}(),
 		{{- end }}
 		},
 	}
@@ -283,13 +281,12 @@ func (i *Input) updateProvider() error {
 }
 
 func (i *Input) getUpdatedProviderData(currentProvider []byte) ([]byte, error) {
-	var updatedProvider bytes.Buffer
-	tmpl := template.Must(template.New(terragenProvider).Parse(providerTemp))
-	if err := tmpl.Execute(&updatedProvider, i); err != nil {
+	updatedProvider, err := renderTemplate(terragenProvider, providerTemp, i)
+	if err != nil {
 		return nil, err
 	}
 
 	dmp := diffmatchpatch.New()
-	providerDiff := dmp.DiffMain(string(currentProvider), updatedProvider.String(), false)
+	providerDiff := dmp.DiffMain(string(currentProvider), string(updatedProvider), false)
 	return []byte(dmp.DiffText2(providerDiff)), nil
 }

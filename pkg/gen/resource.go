@@ -21,32 +21,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func {{ .snakeCaseToCamelCase (index .Resource .Index) }}() *schema.Resource {
+func {{ toCamel (index .Resource .Index) }}() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: {{ .snakeCaseToCamelCase (index .Resource .Index) }}Create,
-		ReadContext:   {{ .snakeCaseToCamelCase (index .Resource .Index) }}Read,
-		DeleteContext: {{ .snakeCaseToCamelCase (index .Resource .Index) }}Delete,
-		UpdateContext: {{ .snakeCaseToCamelCase (index .Resource .Index) }}Update,
+		CreateContext: {{ toCamel (index .Resource .Index) }}Create,
+		ReadContext:   {{ toCamel (index .Resource .Index) }}Read,
+		DeleteContext: {{ toCamel (index .Resource .Index) }}Delete,
+		UpdateContext: {{ toCamel (index .Resource .Index) }}Update,
 		Schema: map[string]*schema.Schema{},
 	}
 }
 
-func {{ .snakeCaseToCamelCase (index .Resource .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ toCamel (index .Resource .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func {{ .snakeCaseToCamelCase (index .Resource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ toCamel (index .Resource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func {{ .snakeCaseToCamelCase (index .Resource .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ toCamel (index .Resource .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func {{ .snakeCaseToCamelCase (index .Resource .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ toCamel (index .Resource .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }

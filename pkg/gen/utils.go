@@ -2,11 +2,18 @@ package gen
 
 import (
 	"fmt"
+	"html/template"
 	"path/filepath"
 	"strings"
 
 	goVersion "github.com/hashicorp/go-version"
 	"github.com/nikhilsbhat/terragen/version"
+)
+
+var (
+	toCamel = template.FuncMap{
+		"toCamel": snakeCaseToCamelCase,
+	}
 )
 
 func (i *Input) getUpdatedResourceNDataSources() error {
@@ -47,11 +54,11 @@ func (i *Input) enrichNames() {
 	}
 }
 
-func (i *Input) snakeCaseToCamelCase(input string) (camelCase string) {
+func snakeCaseToCamelCase(input string) (camelCase string) {
 	isToUpper := false
 	for k, v := range input {
 		if k == 0 {
-			camelCase = strings.ToUpper(string(input[0]))
+			camelCase = strings.ToLower(string(input[0]))
 		} else {
 			if isToUpper {
 				camelCase += strings.ToUpper(string(v))

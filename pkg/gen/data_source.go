@@ -21,15 +21,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func {{ .snakeCaseToCamelCase (index .DataSource .Index) }}() *schema.Resource {
+func {{ toCamel (index .DataSource .Index) }}() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: {{ .snakeCaseToCamelCase (index .DataSource .Index) }}Read,
+		ReadContext: {{ toCamel (index .DataSource .Index) }}Read,
 
 		Schema: map[string]*schema.Schema{},
 	}
 }
 
-func {{ .snakeCaseToCamelCase (index .DataSource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func {{ toCamel (index .DataSource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Your code goes here
 	return nil
 }
