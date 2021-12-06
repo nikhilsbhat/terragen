@@ -6,7 +6,7 @@ terragen.yml
 vendor/
 .idea/
 dist/
-
+cover.out
 
 # dropping locally generated static doc pages
 _site/

@@ -10,7 +10,6 @@ import (
 
 	"github.com/jinzhu/copier"
 	"github.com/nikhilsbhat/neuron/cli/ui"
-	"github.com/nikhilsbhat/terragen/pkg/decode"
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 )
@@ -186,7 +185,7 @@ func (i *Input) CreateProvider(cmd *cobra.Command, args []string) {
 	log.Println(ui.Info("terragen is in the process of making life simpler"))
 	if !i.DryRun {
 		if err := i.setupTerragen(); err != nil {
-			log.Fatal(ui.Error(decode.GetStringOfMessage(err)))
+			log.Fatal(ui.Error(err.Error()))
 		}
 	}
 

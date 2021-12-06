@@ -44,7 +44,7 @@ func TestInput_lockTerragenExecution(t *testing.T) {
 		oldTerragenVersion := "1.0.0"
 		newTerragenVersion := "0.2.0"
 		version.Version = newTerragenVersion
-		metadataFromFile, err := mockGetMetadata("fixtures/terragen.yml")
+		metadataFromFile, err := mockGetMetadata("fixtures/terragen-test.yml")
 		require.NoError(t, err)
 
 		oldVersion, newVersion, lock, err := lockTerragenExecution(metadataFromFile.Version)
@@ -53,6 +53,7 @@ func TestInput_lockTerragenExecution(t *testing.T) {
 		assert.Equal(t, newTerragenVersion, newVersion)
 		assert.Equal(t, oldTerragenVersion, oldVersion)
 	})
+
 	t.Run("Should not lock the execution of terragen", func(t *testing.T) {
 		oldTerragenVersion := "1.0.0"
 		newTerragenVersion := "1.2.0"
@@ -65,6 +66,17 @@ func TestInput_lockTerragenExecution(t *testing.T) {
 		assert.Equal(t, false, lock)
 		assert.Equal(t, newTerragenVersion, newVersion)
 		assert.Equal(t, oldTerragenVersion, oldVersion)
+	})
+}
+
+func Test_snakeCaseToCamelCase(t *testing.T) {
+	t.Run("should be able to convert given snakeCase string to camelCase", func(t *testing.T) {
+		snakeCaseString := "this_is_test"
+		expected := "thisIsTest"
+
+		actual := snakeCaseToCamelCase(snakeCaseString)
+		assert.Equal(t, expected, actual)
+
 	})
 }
 

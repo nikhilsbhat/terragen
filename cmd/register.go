@@ -6,8 +6,6 @@ import (
 	"os"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
-	"github.com/nikhilsbhat/terragen/pkg/decode"
-
 	gen "github.com/nikhilsbhat/terragen/pkg/gen"
 	"github.com/nikhilsbhat/terragen/version"
 	"github.com/spf13/cobra"
@@ -107,7 +105,7 @@ func (cm *cliMeta) echoTerragen(cmd *cobra.Command, args []string) error {
 func versionConfig(cmd *cobra.Command, args []string) error {
 	buildInfo, err := json.Marshal(version.GetBuildInfo())
 	if err != nil {
-		fmt.Println(ui.Error(decode.GetStringOfMessage(err)))
+		fmt.Println(ui.Error(err.Error()))
 		os.Exit(1)
 	}
 	fmt.Println("terragen version:", string(buildInfo))

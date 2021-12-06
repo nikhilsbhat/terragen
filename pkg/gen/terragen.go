@@ -11,7 +11,6 @@ import (
 	"reflect"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
-	"github.com/nikhilsbhat/terragen/pkg/decode"
 )
 
 func newMetadata() *Metadata {
@@ -83,7 +82,7 @@ func (i *Input) getPath() string {
 	if i.Path == "." {
 		dir, err := os.Getwd()
 		if err != nil {
-			fmt.Println(ui.Error(decode.GetStringOfMessage(err)))
+			fmt.Println(ui.Error(err.Error()))
 			os.Exit(1)
 		}
 		return dir

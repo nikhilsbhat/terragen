@@ -42,6 +42,9 @@ local.run: local.build ## Generates the artifact and start the service in the cu
 publish: local.check ## Builds and publishes the app
 	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser release --rm-dist
 
+mock.publish: local.check ## Builds and mocks app release
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser release --skip-publish --rm-dist
+
 dockerise: local.check ## Containerise the appliction
 	docker build . --tag ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
 
@@ -70,3 +73,6 @@ install.hooks: ## install pre-push hooks for the repository.
 
 generate.mock: ## generates mocks for the selected source packages.
 	@go generate ${SRC_PACKAGES}
+
+test: ## runs test cases
+	go test ./... -mod=vendor -coverprofile cover.out
