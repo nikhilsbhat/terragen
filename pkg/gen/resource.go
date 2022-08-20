@@ -21,75 +21,86 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func {{ toCamel (index .Resource .Index) }}() *schema.Resource {
+func {{ toCamel (index .Name .Index) }}() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: {{ toCamel (index .Resource .Index) }}Create,
-		ReadContext:   {{ toCamel (index .Resource .Index) }}Read,
-		DeleteContext: {{ toCamel (index .Resource .Index) }}Delete,
-		UpdateContext: {{ toCamel (index .Resource .Index) }}Update,
+		CreateContext: {{ toCamel (index .Name .Index) }}Create,
+		ReadContext:   {{ toCamel (index .Name .Index) }}Read,
+		DeleteContext: {{ toCamel (index .Name .Index) }}Delete,
+		UpdateContext: {{ toCamel (index .Name .Index) }}Update,
 		Schema: map[string]*schema.Schema{},
 	}
 }
 
-func {{ toCamel (index .Resource .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ toCamel (index .Name .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func {{ toCamel (index .Resource .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ toCamel (index .Name .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func {{ toCamel (index .Resource .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ toCamel (index .Name .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 
-func {{ toCamel (index .Resource .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+func {{ toCamel (index .Name .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
 	// Your code goes here
 	return nil
 }
 `
 )
 
-func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
+type Resource struct {
+	Path           string
+	DryRun         bool
+	Force          bool
+	AutoGenMessage string
+	Provider       string
+	ResourceTemp   string
+	Name           []string
+}
+
+func (i *Input) GenerateResource(cmd *cobra.Command, args []string) {
 	i.Resource = args
 	i.AutoGenMessage = autoGenMessage
 	i.enrichNames()
 	i.Path = i.getPath()
-	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
 	i.getTemplate()
+	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
 
-	if !i.providerScaffolded() {
+	resource := NewResource(i)
+	if !NewProvider(i).Scaffolded() {
 		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was not generated earlier\n\t use"+
 			" `terragen create provider` to create one \n\t run `terragen create provider -h` for more info", i.Provider)))
 	}
 
-	if i.resourceScaffolded() {
+	if resource.Scaffolded() {
 		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for resource '%s' was already generated\n\t use"+
 			" `terragen edit resource` to edit one \n\t run `terragen edit resource -h` for more info", i.Resource[0])))
 	}
 
-	metadata, err := i.getCurrentMetadata()
+	metadata, err := getCurrentMetadata(i.metaDataPath)
 	if err != nil {
 		log.Fatalf(ui.Error(err.Error()))
 	}
 
-	if oldVer, newVer, lock, err := lockTerragenExecution(metadata.Version); lock {
+	if oldVer, newVer, lock, err := lockTerragenExecution(metadata.Version, resource.Force); lock {
 		if err != nil {
 			log.Fatalf(ui.Error(err.Error()))
 		}
 		log.Fatalf("terragen version %v or greater is required\n cannot scaffold more with terragen version '%v', "+
-			"it breaks the project", oldVer, newVer)
+			" it breaks the project", oldVer, newVer)
 	}
 
-	if err := i.createResource(); err != nil {
+	if err := resource.Create(); err != nil {
 		log.Fatal(ui.Error(err.Error()))
 	}
 
-	if err := i.updateProvider(); err != nil {
-		log.Fatal(ui.Error(fmt.Sprintf("updated provider '%s' errored with datasource '%s' with: %v", i.Provider, i.DataSource[0], err)))
+	if err := NewProvider(i).Update(); err != nil {
+		log.Fatal(ui.Error(fmt.Sprintf("updating provider '%s' errored with resource '%s' with: %v", i.Provider, i.Resource[0], err)))
 	}
 
 	if err := i.CreateOrUpdateMetadata(); err != nil {
@@ -97,33 +108,33 @@ func (i *Input) CreateResource(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (i *Input) createResource() error {
-	for index, currentResource := range i.Resource {
-		resourceFilePath := filepath.Join(i.Path, i.Provider)
+func (r *Resource) Create() error {
+	for index, currentResource := range r.Name {
+		resourceFilePath := filepath.Join(r.Path, r.Provider)
 		resourceFile := filepath.Join(resourceFilePath, fmt.Sprintf("%s.go", currentResource))
 
 		log.Println(ui.Info(fmt.Sprintf("scaffolds for resource '%s' would be generated under: '%s'", currentResource, resourceFilePath)))
 
 		type resource struct {
-			*Input
+			*Resource
 			Index int
 		}
 
-		data := &resource{i, index}
+		data := &resource{r, index}
 
-		resourceData, err := renderTemplate(terragenResource, i.TemplateRaw.ResourceTemp, data)
+		resourceData, err := renderTemplate(terragenResource, r.ResourceTemp, data)
 		if err != nil {
 			return fmt.Errorf("oops rendering resource %s errored with: %v ", currentResource, err)
 		}
 
-		if i.DryRun {
+		if r.DryRun {
 			log.Println(ui.Info("contents of resource looks like"))
 			printData(resourceData)
 		} else {
 			if err = terragenFileCreate(resourceFile); err != nil {
 				return fmt.Errorf("oops creating resource errored with: %v ", err)
 			}
-			if err = ioutil.WriteFile(resourceFile, resourceData, 0700); err != nil { //nolint:gosec
+			if err = ioutil.WriteFile(resourceFile, resourceData, scaffoldPerm); err != nil {
 				return fmt.Errorf("oops scaffolding resource %s errored with: %v ", currentResource, err)
 			}
 		}
@@ -131,17 +142,30 @@ func (i *Input) createResource() error {
 	return nil
 }
 
-func (i *Input) resourceScaffolded() bool {
-	currentMetaData, err := i.getCurrentMetadata()
+func (r *Resource) Scaffolded() bool {
+	currentMetaData, err := getCurrentMetadata(filepath.Join(r.Path, terragenMetadata))
 	if err != nil {
 		log.Println(ui.Error(err.Error()))
 		return false
 	}
 
-	for _, resource := range i.Resource {
-		if utils.Contains(currentMetaData.Resources, resource) {
+	for _, dataSource := range r.Name {
+		if utils.Contains(currentMetaData.DataSources, dataSource) {
 			return true
 		}
 	}
+
 	return false
+}
+
+func NewResource(i *Input) *Resource {
+	return &Resource{
+		Path:           i.Path,
+		DryRun:         i.DryRun,
+		Force:          i.Force,
+		AutoGenMessage: i.AutoGenMessage,
+		Provider:       i.Provider,
+		ResourceTemp:   i.TemplateRaw.ResourceTemp,
+		Name:           i.Resource,
+	}
 }

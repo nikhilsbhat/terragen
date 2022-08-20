@@ -6,7 +6,6 @@ linters:
     - deadcode
     - depguard
     - dogsled
-    - dupl
     - errcheck
     - funlen
     - goconst

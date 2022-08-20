@@ -27,7 +27,8 @@ func TestJSONDecode(t *testing.T) {
 		jsonData := `{"name":30, "age":30}`
 		name := &testStruct{}
 
-		expectedErr := fmt.Sprintf("error occurred at line 1, json: cannot unmarshal number into Go struct field testStruct.name of type string\n{\"name\":30, \"age\":30}\nThe data type you entered for the value is wrong")
+		expectedErr := "error occurred at line 1, json: cannot unmarshal number into Go struct field testStruct.name of type " +
+			"string\n{\"name\":30, \"age\":30}\nThe data type you entered for the value is wrong"
 
 		err := JSONDecode([]byte(jsonData), name)
 		assert.EqualError(t, err, expectedErr)
@@ -38,7 +39,7 @@ func TestJSONDecode(t *testing.T) {
 		name := &testStruct{}
 		expected := &testStruct{Name: "", Age: 0}
 
-		expectedErr := fmt.Sprintf("error occurred at line 1, unexpected end of JSON input\n{\"name\":30, \"age:30}")
+		expectedErr := "error occurred at line 1, unexpected end of JSON input\n{\"name\":30, \"age:30}"
 
 		err := JSONDecode([]byte(jsonData), name)
 		assert.EqualError(t, err, expectedErr)

@@ -8,7 +8,7 @@ func initCommands() {
 		Short: "Command to generate scaffolds for terraform provider",
 		Long: `Command to generate scaffolds for terraform provider and its other components.
                This includes creation of provider, resource, datasource.`,
-		Run:          genin.CreateProvider,
+		Run:          genin.Generate,
 		Args:         cobra.MinimumNArgs(1),
 		SilenceUsage: true,
 	})
@@ -17,7 +17,7 @@ func initCommands() {
 		Use:          "datasource [args] [flags]",
 		Short:        "Command to generate scaffolds for datasource",
 		Long:         `This will help user to generate scaffolds for datasource of chosen provider.`,
-		Run:          genin.CreateDataSource,
+		Run:          genin.GenerateDataSource,
 		Args:         cobra.MinimumNArgs(1),
 		SilenceUsage: true,
 	})
@@ -26,7 +26,7 @@ func initCommands() {
 		Use:          "resource [args] [flags]",
 		Short:        "Command to generate scaffolds for resource",
 		Long:         `This will help user to generate scaffolds for resource of chosen provider.`,
-		Run:          genin.CreateResource,
+		Run:          genin.GenerateResource,
 		Args:         cobra.MinimumNArgs(1),
 		SilenceUsage: true,
 	})
@@ -36,7 +36,7 @@ func initCommands() {
 		Short: "Command to edit already generated scaffolds of a provider",
 		Long: `Command to edit scaffolds of terraform provider that was already generated. 
                Not all aspects of provider can be edited, it is very limited`,
-		Run:          genin.CreateProvider,
+		Run:          genin.Generate,
 		Args:         cobra.MinimumNArgs(1),
 		SilenceUsage: true,
 	})
@@ -46,7 +46,7 @@ func initCommands() {
 		Short: "Command to edit already generated scaffolds of a datasource",
 		Long: `This will help user to edit scaffolds of datasource that was already generated.
                Not all aspects of datasource can be edited, it is very limited`,
-		Run:          genin.CreateDataSource,
+		Run:          genin.GenerateDataSource,
 		Args:         cobra.MinimumNArgs(1),
 		SilenceUsage: true,
 	})
@@ -56,7 +56,7 @@ func initCommands() {
 		Short: "Command to edit already created scaffolds generated scaffolds of resource",
 		Long: `This will help user to edit scaffolds of resource that was already generated.
                Not all aspects of resource can be edited, it is very limited`,
-		Run:          genin.CreateResource,
+		Run:          genin.GenerateResource,
 		Args:         cobra.MinimumNArgs(1),
 		SilenceUsage: true,
 	})

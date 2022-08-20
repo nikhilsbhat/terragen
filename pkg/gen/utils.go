@@ -3,7 +3,7 @@ package gen
 import (
 	"fmt"
 	"html/template"
-	"path/filepath"
+	"os"
 	"strings"
 
 	goVersion "github.com/hashicorp/go-version"
@@ -14,18 +14,11 @@ var (
 	toCamel = template.FuncMap{
 		"toCamel": snakeCaseToCamelCase,
 	}
+	filePerm        = 0700
+	dirPerm         = 0777
+	scaffoldPerm    = os.FileMode(filePerm)
+	scaffoldDirPerm = os.FileMode(dirPerm)
 )
-
-func (i *Input) getUpdatedResourceNDataSources() error {
-	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
-	metadata, err := i.getCurrentMetadata()
-	if err != nil {
-		return err
-	}
-	i.DataSource = append(i.DataSource, metadata.DataSources...)
-	i.Resource = append(i.Resource, metadata.Resources...)
-	return nil
-}
 
 func (i *Input) setMod() string {
 	if len(i.RepoGroup) == 0 {
@@ -49,7 +42,7 @@ func (i *Input) enrichNames() {
 		}
 		i.DataSource = datasource
 	}
-	if len(i.Importer) != 0 {
+	if len(i.Importer) != 0 { //nolint:staticcheck
 		// to be implemented once we hit on importers.
 	}
 }
@@ -75,7 +68,10 @@ func snakeCaseToCamelCase(input string) (camelCase string) {
 	return
 }
 
-func lockTerragenExecution(currentVersion string) (old, new string, lock bool, err error) {
+func lockTerragenExecution(currentVersion string, force bool) (old, new string, lock bool, err error) {
+	if force {
+		return "", "", false, nil
+	}
 	terragenVersionUnkown := "unknown-version"
 
 	if len(currentVersion) == 0 {

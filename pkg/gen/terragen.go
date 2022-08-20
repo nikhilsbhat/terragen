@@ -4,29 +4,21 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"log"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"reflect"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
-func newMetadata() *Metadata {
-	return &Metadata{}
-}
-
-func newInput() *Input {
-	return &Input{}
-}
-
 func terragenFileCreate(path string) error {
 	_, err := os.Create(path)
 	return err
 }
 
-func (i *Input) setDefaults() {
+func (i *Input) setRequires() {
 	if len(i.Resource) != 0 {
 		i.ResourceRequired = true
 	}
@@ -51,7 +43,14 @@ func (i *Input) setupTerragen() error {
 		return err
 	}
 
-	goVnd := exec.Command("go", "mod", "vendor") //nolint:gosec
+	goTidy := exec.Command("go", "mod", "tidy")
+	goTidy.Dir = i.Path
+	if err := goTidy.Run(); err != nil {
+		log.Println(ui.Error(err.Error()))
+		return err
+	}
+
+	goVnd := exec.Command("go", "mod", "vendor")
 	goVnd.Dir = i.Path
 	if err := goVnd.Run(); err != nil {
 		return err
@@ -60,7 +59,7 @@ func (i *Input) setupTerragen() error {
 }
 
 func (i *Input) genTerraDir() error {
-	err := os.MkdirAll(filepath.Join(i.Path, i.Provider), 0777)
+	err := os.MkdirAll(filepath.Join(i.Path, i.Provider), scaffoldDirPerm)
 	if err != nil {
 		return err
 	}
@@ -87,7 +86,12 @@ func (i *Input) getPath() string {
 		}
 		return dir
 	}
-	return path.Dir(i.Path)
+	path, err := filepath.Abs(i.Path)
+	if err != nil {
+		fmt.Println(ui.Error(err.Error()))
+		os.Exit(1)
+	}
+	return path
 }
 
 func renderTemplate(templateName, temp string, data interface{}) ([]byte, error) {
@@ -97,4 +101,42 @@ func renderTemplate(templateName, temp string, data interface{}) ([]byte, error)
 		return nil, err
 	}
 	return templateWriter.Bytes(), nil
+}
+
+func validatePrerequisite() bool {
+	success := true
+	if _, err := exec.LookPath("go"); err != nil {
+		log.Println(ui.Info(err.Error()))
+		success = false
+	}
+
+	if _, err := exec.LookPath("goimports"); err != nil {
+		log.Println(ui.Info(err.Error()))
+		log.Println(ui.Info("install goimports: go install goimports"))
+		success = false
+	}
+
+	if _, err := exec.LookPath("gofumpt"); err != nil {
+		log.Println(ui.Info(err.Error()))
+		log.Println(ui.Info("install gofumpt: go install gofumpt"))
+		success = false
+	}
+
+	if _, err := exec.LookPath("gofmt"); err != nil {
+		log.Println(ui.Info(err.Error()))
+		log.Println(ui.Info("install gofmt: go install gofmt"))
+		success = false
+	}
+
+	if success {
+		log.Println(ui.Info("scaffolds would be generated with following golang version"))
+		out, err := exec.Command("go", "version").Output()
+		if err != nil {
+			log.Println(ui.Error(err.Error()))
+		}
+		log.Print(ui.Info(string(bytes.TrimRight(out, "\n"))))
+
+		return success
+	}
+	return success
 }

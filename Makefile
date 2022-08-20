@@ -26,6 +26,7 @@ help: ## Prints help (only for targets with comments)
 local.fmt: ## Lints all the go code in the application.
 	gofmt -w $(GOFMT_FILES)
 	$(GOBIN)/goimports -w $(GOFMT_FILES)
+	$(GOBIN)/goimports -w $(GOFMT_FILES)
 
 local.check: local.fmt ## Loads all the dependencies to vendor directory
 	go mod vendor

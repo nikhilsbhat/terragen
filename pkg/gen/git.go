@@ -33,38 +33,52 @@ terraform.tfstate*
 `
 )
 
-// createGitIgnore scaffolds the provider and its components as per the requirements.
-func (i *Input) createGitIgnore() error {
-	mainFile := filepath.Join(i.Path, terrgenGitIgnore)
-	gitIgnoreData, err := renderTemplate(terrgenGitIgnore, i.TemplateRaw.GitIgnore, i)
+type Git struct {
+	DryRun    bool
+	Provider  string
+	Path      string
+	GitIgnore string
+}
+
+// Create scaffolds Git as per the requirements.
+func (g *Git) Create() error {
+	mainFile := filepath.Join(g.Path, terrgenGitIgnore)
+	gitIgnoreData, err := renderTemplate(terrgenGitIgnore, g.GitIgnore, g)
+
 	if err != nil {
 		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terrgenGitIgnore, err)
 	}
 
-	if i.DryRun {
-		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terrgenGitIgnore, i.Path)))
+	if g.DryRun {
+		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terrgenGitIgnore, g.Path)))
 		log.Println(ui.Info("contents of gitignore looks like"))
 		printData(gitIgnoreData)
 	} else {
 		if err = terragenFileCreate(mainFile); err != nil {
 			return err
 		}
-		if err = ioutil.WriteFile(filepath.Join(i.Path, terrgenGitIgnore), gitIgnoreData, 0700); err != nil { //nolint:gosec
+		if err = ioutil.WriteFile(filepath.Join(g.Path, terrgenGitIgnore), gitIgnoreData, scaffoldPerm); err != nil {
 			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terrgenGitIgnore, err)
 		}
 	}
 
-	if err := i.initGit(); err != nil {
+	_, err = git.PlainInit(g.Path, false)
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (i *Input) initGit() error {
-	_, err := git.PlainInit(i.Path, false)
-	if err != nil {
-		return err
+func (g *Git) Scaffolded() bool {
+	return false
+}
+
+func NewGit(i *Input) *Git {
+	return &Git{
+		DryRun:    i.DryRun,
+		Provider:  i.Provider,
+		Path:      i.Path,
+		GitIgnore: i.TemplateRaw.GitIgnore,
 	}
-	return nil
 }

@@ -12,3 +12,5 @@ cover.out
 _site/
 docs/Gemfile.lock
 .jekyll-metadata
+terragen-linux
+terragen

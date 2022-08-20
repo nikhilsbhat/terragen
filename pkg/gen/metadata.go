@@ -11,12 +11,36 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func (i *Input) CreateOrUpdateMetadata() error {
-	i.metaDataPath = filepath.Join(i.Path, terragenMetadata)
+type Metadata interface {
+	Get(repoGroup, mod string) *Config
+}
 
-	var metadata *Metadata
-	if i.scaffoldStatus() {
-		currentMetaData, err := i.getCurrentMetadata()
+// Config would be generated and stored by the utility for further references.
+type Config struct {
+	// Version of terragen used for generating scaffolds. Updates only when higher version of terragen used.
+	Version string `json:"version" yaml:"version"`
+	// RepoGroup to which the project is part of.
+	RepoGroup string `json:"repo-group" yaml:"repo-group"`
+	// ProjectModule represents the module of the project
+	ProjectModule string `json:"project-module" yaml:"project-module"`
+	// Provider name that was scaffolded.
+	Provider string `json:"provider" yaml:"provider"`
+	// ProviderPath where scaffolds were created.
+	ProviderPath string `json:"provider-path" yaml:"provider-path"`
+	// Resources that where scaffolded.
+	Resources []string `json:"resources" yaml:"resources"`
+	// DataSources that where scaffolded.
+	DataSources []string `json:"data-sources" yaml:"data-sources"`
+	// Importers that where scaffolded.
+	Importers []string `json:"importers" yaml:"importers"`
+}
+
+func (i *Input) CreateOrUpdateMetadata() error {
+	metaDataPath := filepath.Join(i.Path, terragenMetadata)
+
+	var metadata *Config
+	if i.MetadataScaffolded() {
+		currentMetaData, err := getCurrentMetadata(i.metaDataPath)
 		if err != nil {
 			return err
 		}
@@ -42,7 +66,7 @@ func (i *Input) CreateOrUpdateMetadata() error {
 	if err != nil {
 		return err
 	}
-	writer, err := i.getMetaWriter()
+	writer, err := getMetaWriter(metaDataPath)
 	if err != nil {
 		return err
 	}
@@ -53,27 +77,15 @@ func (i *Input) CreateOrUpdateMetadata() error {
 	return nil
 }
 
-func (i *Input) scaffoldStatus() bool {
+func (i *Input) MetadataScaffolded() bool {
 	if _, fileErr := os.Stat(i.metaDataPath); os.IsNotExist(fileErr) {
 		return false
 	}
 	return true
 }
 
-func (i *Input) getCurrentMetadata() (*Metadata, error) {
-	var metadata Metadata
-	meta, err := decode.ReadFile(i.metaDataPath)
-	if err != nil {
-		return nil, err
-	}
-	if err = yaml.Unmarshal(meta, &metadata); err != nil {
-		return nil, err
-	}
-	return &metadata, nil
-}
-
-func (i *Input) getMetadata() *Metadata {
-	return &Metadata{
+func (i *Input) getMetadata() *Config {
+	return &Config{
 		Version:       version.Version,
 		RepoGroup:     i.RepoGroup,
 		Provider:      i.Provider,
@@ -85,9 +97,25 @@ func (i *Input) getMetadata() *Metadata {
 	}
 }
 
-func (i *Input) getMetaWriter() (*os.File, error) {
-	if _, fileErr := os.Stat(i.metaDataPath); os.IsNotExist(fileErr) {
-		return os.Create(i.metaDataPath)
+func getMetaWriter(path string) (*os.File, error) {
+	if _, fileErr := os.Stat(path); os.IsNotExist(fileErr) {
+		return os.Create(path)
 	}
-	return os.OpenFile(i.metaDataPath, os.O_WRONLY, os.ModeAppend)
+	return os.OpenFile(path, os.O_WRONLY, os.ModeAppend)
+}
+
+func getCurrentMetadata(path string) (*Config, error) {
+	var metadata Config
+	meta, err := decode.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	if err = yaml.Unmarshal(meta, &metadata); err != nil {
+		return nil, err
+	}
+	return &metadata, nil
+}
+
+func newMetadata() *Config {
+	return &Config{}
 }

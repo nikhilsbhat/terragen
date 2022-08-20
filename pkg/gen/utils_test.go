@@ -47,7 +47,7 @@ func TestInput_lockTerragenExecution(t *testing.T) {
 		metadataFromFile, err := mockGetMetadata("fixtures/terragen-test.yml")
 		require.NoError(t, err)
 
-		oldVersion, newVersion, lock, err := lockTerragenExecution(metadataFromFile.Version)
+		oldVersion, newVersion, lock, err := lockTerragenExecution(metadataFromFile.Version, false)
 		require.NoError(t, err)
 		assert.Equal(t, true, lock)
 		assert.Equal(t, newTerragenVersion, newVersion)
@@ -61,7 +61,7 @@ func TestInput_lockTerragenExecution(t *testing.T) {
 		metadataFromFile, err := mockGetMetadata("fixtures/terragen-test.yml")
 		require.NoError(t, err)
 
-		oldVersion, newVersion, lock, err := lockTerragenExecution(metadataFromFile.Version)
+		oldVersion, newVersion, lock, err := lockTerragenExecution(metadataFromFile.Version, false)
 		require.NoError(t, err)
 		assert.Equal(t, false, lock)
 		assert.Equal(t, newTerragenVersion, newVersion)
@@ -76,11 +76,10 @@ func Test_snakeCaseToCamelCase(t *testing.T) {
 
 		actual := snakeCaseToCamelCase(snakeCaseString)
 		assert.Equal(t, expected, actual)
-
 	})
 }
 
-func mockGetMetadata(path string) (*Metadata, error) {
+func mockGetMetadata(path string) (*Config, error) {
 	metaData, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
