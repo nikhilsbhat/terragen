@@ -10,9 +10,7 @@ type cliMeta struct {
 	*ui.NeuronUi
 }
 
-var (
-	cm = &cliMeta{}
-)
+var cm = &cliMeta{}
 
 func init() {
 	nui := ui.NeuronUi{

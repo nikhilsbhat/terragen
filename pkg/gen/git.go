@@ -10,8 +10,7 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 )
 
-var (
-	gitignore = `
+var gitignore = `
 # dropping IDE data's
 .vscode
 .idea
@@ -31,7 +30,6 @@ terraform.tfstate*
 .terraform
 *.log
 `
-)
 
 type Git struct {
 	DryRun    bool
@@ -44,7 +42,6 @@ type Git struct {
 func (g *Git) Create() error {
 	mainFile := filepath.Join(g.Path, terrgenGitIgnore)
 	gitIgnoreData, err := renderTemplate(terrgenGitIgnore, g.GitIgnore, g)
-
 	if err != nil {
 		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terrgenGitIgnore, err)
 	}

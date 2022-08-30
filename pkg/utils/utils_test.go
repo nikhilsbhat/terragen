@@ -21,9 +21,7 @@ func TestContains(t *testing.T) {
 }
 
 func TestHasChange(t *testing.T) {
-	var (
-		sampleSliceOne = []string{"first", "second", "third"}
-	)
+	sampleSliceOne := []string{"first", "second", "third"}
 	t.Run("should return true as slices to be compared has changes from one another", func(t *testing.T) {
 		newSampleSliceTwo := []string{"first", "second"}
 		expected := true

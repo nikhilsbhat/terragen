@@ -9,8 +9,7 @@ import (
 	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
-var (
-	mainTemp = `{{ .AutoGenMessage }}
+var mainTemp = `{{ .AutoGenMessage }}
 package main
 
 import (
@@ -23,7 +22,6 @@ func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: {{ .Provider }}.Provider})
 }`
-)
 
 type Main struct {
 	DryRun         bool
@@ -37,7 +35,6 @@ type Main struct {
 func (m *Main) Create() error {
 	mainFile := filepath.Join(m.Path, terragenMain)
 	mainData, err := renderTemplate(terragenMain, m.RootTemp, m)
-
 	if err != nil {
 		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terragenMain, err)
 	}

@@ -14,8 +14,8 @@ var (
 	toCamel = template.FuncMap{
 		"toCamel": snakeCaseToCamelCase,
 	}
-	filePerm        = 0700
-	dirPerm         = 0777
+	filePerm        = 0o700
+	dirPerm         = 0o777
 	scaffoldPerm    = os.FileMode(filePerm)
 	scaffoldDirPerm = os.FileMode(dirPerm)
 )

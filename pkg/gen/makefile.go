@@ -58,7 +58,6 @@ type Make struct {
 func (m *Make) Create() error {
 	makeFile := filepath.Join(m.Path, terragenMakefile)
 	makeFileData, err := renderTemplate(terragenMakefile, makefileTemplate, m)
-
 	if err != nil {
 		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terragenMakefile, err)
 	}

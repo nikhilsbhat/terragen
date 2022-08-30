@@ -11,8 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	resourceTemp = `{{ .AutoGenMessage }}
+var resourceTemp = `{{ .AutoGenMessage }}
 package {{ .Provider }}
 
 import (
@@ -51,7 +50,6 @@ func {{ toCamel (index .Name .Index) }}Update(ctx context.Context, d *schema.Res
 	return nil
 }
 `
-)
 
 type Resource struct {
 	Path           string

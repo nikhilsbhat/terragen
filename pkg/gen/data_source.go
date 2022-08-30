@@ -11,8 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	dataSourceTemp = `{{ .AutoGenMessage }}
+var dataSourceTemp = `{{ .AutoGenMessage }}
 package {{ .Provider }}
 
 import (
@@ -34,7 +33,6 @@ func {{ toCamel (index .Name .Index) }}Read(ctx context.Context, d *schema.Resou
 	return nil
 }
 `
-)
 
 type DataSource struct {
 	Path           string

@@ -13,8 +13,7 @@ import (
 	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
-var (
-	providerTemp = `{{ .AutoGenMessage }}
+var providerTemp = `{{ .AutoGenMessage }}
 package {{ .Provider }}
 
 import (
@@ -40,7 +39,6 @@ func Provider() *schema.Provider {
 	}
 }
 `
-)
 
 type Provider struct {
 	Provider       string
@@ -58,7 +56,6 @@ type Provider struct {
 func (p *Provider) Create() error {
 	provideFile := filepath.Join(p.Path, p.Provider, terragenProvider)
 	providerData, err := renderTemplate(terragenProvider, p.ProviderTemp, p)
-
 	if err != nil {
 		log.Fatalf(ui.Error(fmt.Sprintf("oops rendering provider %s errored with: %v ", p.Provider, err)))
 	}

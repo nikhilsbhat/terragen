@@ -86,8 +86,7 @@ type TerraTemplate struct {
 	GitIgnore string `json:"gitignore" yaml:"gitignore"`
 }
 
-var (
-	autoGenMessage = `// ----------------------------------------------------------------------------
+var autoGenMessage = `// ----------------------------------------------------------------------------
 //
 //     ***     TERRAGEN GENERATED CODE    ***    TERRAGEN GENERATED CODE     ***
 //
@@ -100,7 +99,6 @@ var (
 //     https://github.com/nikhilsbhat/terragen
 //
 // ----------------------------------------------------------------------------`
-)
 
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
