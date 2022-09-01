@@ -1,0 +1,18 @@
+# dropping IDE data's
+.vscode
+.idea
+
+.DS_Store
+
+# dropping vendor and other data directories
+vendor/
+
+# dropping local built binaries
+terraform-provider-demo
+terraform-provider-{{ .Provider }}
+
+# dropping terraform plans and states
+terraform.tfstate*
+*.tfplan
+.terraform
+*.log

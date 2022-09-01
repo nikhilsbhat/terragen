@@ -1,27 +1,17 @@
 package gen
 
 import (
+	_ "embed"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
-var mainTemp = `{{ .AutoGenMessage }}
-package main
-
-import (
-	{{- range $index, $element := .Dependents }}
-	"{{- $element }}"
-	{{- end }}
-)
-
-func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: {{ .Provider }}.Provider})
-}`
+//go:embed templates/main.tmpl
+var mainTemp string
 
 type Main struct {
 	DryRun         bool
@@ -43,11 +33,12 @@ func (m *Main) Create() error {
 		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terragenMain, m.Path)))
 		log.Println(ui.Info("contents of main.go looks like"))
 		printData(mainData)
+		return nil
 	} else {
 		if err = terragenFileCreate(mainFile); err != nil {
 			return err
 		}
-		if err = ioutil.WriteFile(filepath.Join(m.Path, terragenMain), mainData, scaffoldPerm); err != nil {
+		if err = os.WriteFile(filepath.Join(m.Path, terragenMain), mainData, scaffoldPerm); err != nil {
 			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terragenMain, err)
 		}
 	}

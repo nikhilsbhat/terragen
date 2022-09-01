@@ -14,6 +14,7 @@ func registerFlags(command string, cmd *cobra.Command) {
 		cmd.PersistentFlags().BoolVarP(&genin.DryRun, "dry-run", "", false, "dry-run the process of provider scaffold creation")
 		cmd.PersistentFlags().BoolVarP(&genin.Force, "force", "f",
 			false, "enable this to forcefully create resource/datasource/importers (this might tamper the scaffold)")
+		cmd.PersistentFlags().BoolVarP(&genin.TerraformPluginFramework, "use-plugin-framework", "", false, "enable this to generate scaffolds with terraform-plugin-framework(https://github.com/hashicorp/terraform-plugin-framework)")
 	case "create":
 		// cmd.PersistentFlags().StringVarP(&genin.Provider, "name", "n", "demo", "name of the provider to create scaffolds")
 	case "provider":

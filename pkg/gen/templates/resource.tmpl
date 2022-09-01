@@ -1,0 +1,38 @@
+{{ .AutoGenMessage }}
+package {{ .Provider }}
+
+import (
+    "context"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func {{ toCamel (index .Name .Index) }}() *schema.Resource {
+    return &schema.Resource{
+        CreateContext: {{ toCamel (index .Name .Index) }}Create,
+        ReadContext:   {{ toCamel (index .Name .Index) }}Read,
+        DeleteContext: {{ toCamel (index .Name .Index) }}Delete,
+        UpdateContext: {{ toCamel (index .Name .Index) }}Update,
+        Schema: map[string]*schema.Schema{},
+        }
+}
+
+func {{ toCamel (index .Name .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+    // Your code goes here
+    return nil
+}
+
+func {{ toCamel (index .Name .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+    // Your code goes here
+    return nil
+}
+
+func {{ toCamel (index .Name .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+    // Your code goes here
+    return nil
+}
+
+func {{ toCamel (index .Name .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
+    // Your code goes here
+    return nil
+}

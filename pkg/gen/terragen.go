@@ -2,6 +2,7 @@ package gen
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -105,27 +106,36 @@ func renderTemplate(templateName, temp string, data interface{}) ([]byte, error)
 
 func validatePrerequisite() bool {
 	success := true
-	if _, err := exec.LookPath("go"); err != nil {
-		log.Println(ui.Info(err.Error()))
-		success = false
+	if goPath := exec.Command("go"); goPath.Err != nil {
+		if !errors.Is(goPath.Err, exec.ErrDot) {
+			log.Println(ui.Info(goPath.Err.Error()))
+			log.Println(ui.Info("terragen requires go to generate scaffolds"))
+			success = false
+		}
 	}
 
-	if _, err := exec.LookPath("goimports"); err != nil {
-		log.Println(ui.Info(err.Error()))
-		log.Println(ui.Info("install goimports: go install goimports"))
-		success = false
+	if importsPath := exec.Command("goimports"); importsPath.Err != nil {
+		if !errors.Is(importsPath.Err, exec.ErrDot) {
+			log.Println(ui.Info(importsPath.Err.Error()))
+			log.Println(ui.Info("install goimports: go install goimports"))
+			success = false
+		}
 	}
 
-	if _, err := exec.LookPath("gofumpt"); err != nil {
-		log.Println(ui.Info(err.Error()))
-		log.Println(ui.Info("install gofumpt: go install gofumpt"))
-		success = false
+	if fumptCmd := exec.Command("gofumpt"); fumptCmd.Err != nil {
+		if !errors.Is(fumptCmd.Err, exec.ErrDot) {
+			log.Println(ui.Error(fumptCmd.Err.Error()))
+			log.Println(ui.Error("install gofumpt: go install gofumpt"))
+			success = false
+		}
 	}
 
-	if _, err := exec.LookPath("gofmt"); err != nil {
-		log.Println(ui.Info(err.Error()))
-		log.Println(ui.Info("install gofmt: go install gofmt"))
-		success = false
+	if fmtCmd := exec.Command("gofmt"); fmtCmd.Err != nil {
+		if !errors.Is(fmtCmd.Err, exec.ErrDot) {
+			log.Println(ui.Info(fmtCmd.Err.Error()))
+			log.Println(ui.Info("install gofmt: go install gofmt"))
+			success = false
+		}
 	}
 
 	if success {

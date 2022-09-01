@@ -1,6 +1,6 @@
 module github.com/nikhilsbhat/terragen
 
-go 1.18
+go 1.19
 
 require (
 	github.com/hashicorp/go-version v0.0.0-20160119211326-7e3c02b30806

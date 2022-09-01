@@ -1,6 +1,7 @@
 package gen
 
 import (
+	_ "embed"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,32 +14,8 @@ import (
 	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
-var providerTemp = `{{ .AutoGenMessage }}
-package {{ .Provider }}
-
-import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
-
-// Provider returns a terraform.ResourceProvider.
-func Provider() *schema.Provider {
-	return &schema.Provider{
-		Schema: map[string]*schema.Schema{},
-
-		ResourcesMap: map[string]*schema.Resource{
-		{{- range $resource := .Resource }}
-			"{{ $resource }}": {{ toCamel $resource }}(),
-		{{- end }}
-		},
-
-		DataSourcesMap: map[string]*schema.Resource{
-		{{- range $datasource := .DataSource }}
-			"{{ $datasource }}": {{ toCamel $datasource }}(),
-		{{- end }}
-		},
-	}
-}
-`
+//go:embed templates/provider.tmpl
+var providerTemp string
 
 type Provider struct {
 	Provider       string
@@ -64,8 +41,9 @@ func (p *Provider) Create() error {
 		log.Println(ui.Info(fmt.Sprintf("provider '%s' would be created under '%s'", p.Provider, p.Path)))
 		log.Println(ui.Info("contents of provider looks like"))
 		printData(providerData)
+		return nil
 	} else {
-		if err = ioutil.WriteFile(provideFile, providerData, scaffoldPerm); err != nil {
+		if err = os.WriteFile(provideFile, providerData, scaffoldPerm); err != nil {
 			return fmt.Errorf("oops scaffolding provider %s errored with: %v ", p.Provider, err)
 		}
 	}
@@ -94,7 +72,7 @@ func (p *Provider) Update() error {
 	}
 
 	providerFile := filepath.Join(newIn.Path, newIn.Provider, terragenProvider)
-	if err = ioutil.WriteFile(providerFile, updateData, scaffoldPerm); err != nil {
+	if err = os.WriteFile(providerFile, updateData, scaffoldPerm); err != nil {
 		return err
 	}
 	return nil

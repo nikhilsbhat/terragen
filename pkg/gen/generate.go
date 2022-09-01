@@ -67,9 +67,10 @@ type Input struct {
 	// Enabling this might tamper the scaffolds
 	Force bool
 	// SkipValidation will skip validating all the prerequisites such as checking go,goimports etc.
-	SkipValidation bool
-	mod            string
-	metaDataPath   string
+	SkipValidation           bool
+	TerraformPluginFramework bool
+	mod                      string
+	metaDataPath             string
 }
 
 // TerraTemplate are the collections of go-templates which are used to generate terraform provider's base template.

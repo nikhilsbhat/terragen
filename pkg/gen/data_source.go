@@ -1,9 +1,10 @@
 package gen
 
 import (
+	_ "embed"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
@@ -11,28 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var dataSourceTemp = `{{ .AutoGenMessage }}
-package {{ .Provider }}
-
-import (
-    "context"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
-
-func {{ toCamel (index .Name .Index) }}() *schema.Resource {
-	return &schema.Resource{
-		ReadContext: {{ toCamel (index .Name .Index) }}Read,
-
-		Schema: map[string]*schema.Schema{},
-	}
-}
-
-func {{ toCamel (index .Name .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// Your code goes here
-	return nil
-}
-`
+//go:embed templates/datasource.tmpl
+var dataSourceTemp string
 
 type DataSource struct {
 	Path           string
@@ -111,11 +92,12 @@ func (d *DataSource) Create() error {
 		if d.DryRun {
 			log.Println(ui.Info("contents of data source looks like"))
 			printData(dataSourceData)
+			return nil
 		} else {
 			if err = terragenFileCreate(dataSourceFile); err != nil {
 				return fmt.Errorf("oops creating data source errored with: %v ", err)
 			}
-			if err = ioutil.WriteFile(dataSourceFile, dataSourceData, scaffoldPerm); err != nil {
+			if err = os.WriteFile(dataSourceFile, dataSourceData, scaffoldPerm); err != nil {
 				return fmt.Errorf("oops scaffolding data_source %s errored with: %v ", currentDataSource, err)
 			}
 		}

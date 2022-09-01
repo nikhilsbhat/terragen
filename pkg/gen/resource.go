@@ -1,9 +1,10 @@
 package gen
 
 import (
+	_ "embed"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/nikhilsbhat/neuron/cli/ui"
@@ -11,45 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var resourceTemp = `{{ .AutoGenMessage }}
-package {{ .Provider }}
-
-import (
-    "context"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
-
-func {{ toCamel (index .Name .Index) }}() *schema.Resource {
-	return &schema.Resource{
-		CreateContext: {{ toCamel (index .Name .Index) }}Create,
-		ReadContext:   {{ toCamel (index .Name .Index) }}Read,
-		DeleteContext: {{ toCamel (index .Name .Index) }}Delete,
-		UpdateContext: {{ toCamel (index .Name .Index) }}Update,
-		Schema: map[string]*schema.Schema{},
-	}
-}
-
-func {{ toCamel (index .Name .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
-	// Your code goes here
-	return nil
-}
-
-func {{ toCamel (index .Name .Index) }}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
-	// Your code goes here
-	return nil
-}
-
-func {{ toCamel (index .Name .Index) }}Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
-	// Your code goes here
-	return nil
-}
-
-func {{ toCamel (index .Name .Index) }}Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
-	// Your code goes here
-	return nil
-}
-`
+//go:embed templates/resource.tmpl
+var resourceTemp string
 
 type Resource struct {
 	Path           string
@@ -128,11 +92,12 @@ func (r *Resource) Create() error {
 		if r.DryRun {
 			log.Println(ui.Info("contents of resource looks like"))
 			printData(resourceData)
+			return nil
 		} else {
 			if err = terragenFileCreate(resourceFile); err != nil {
 				return fmt.Errorf("oops creating resource errored with: %v ", err)
 			}
-			if err = ioutil.WriteFile(resourceFile, resourceData, scaffoldPerm); err != nil {
+			if err = os.WriteFile(resourceFile, resourceData, scaffoldPerm); err != nil {
 				return fmt.Errorf("oops scaffolding resource %s errored with: %v ", currentResource, err)
 			}
 		}

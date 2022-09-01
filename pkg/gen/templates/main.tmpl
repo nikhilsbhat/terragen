@@ -1,0 +1,13 @@
+{{ .AutoGenMessage }}
+package main
+
+import (
+{{- range $index, $element := .Dependents }}
+    "{{- $element }}"
+{{- end }}
+)
+
+func main() {
+    plugin.Serve(&plugin.ServeOpts{
+        ProviderFunc: {{ .Provider }}.Provider})
+}
