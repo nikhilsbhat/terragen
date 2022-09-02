@@ -71,10 +71,17 @@ func (i *Input) genTerraDir() error {
 func (i *Input) getTemplate() {
 	if reflect.DeepEqual(i.TemplateRaw, TerraTemplate{}) {
 		i.TemplateRaw.RootTemp = mainTemp
-		i.TemplateRaw.ProviderTemp = providerTemp
-		i.TemplateRaw.DataTemp = dataSourceTemp
-		i.TemplateRaw.ResourceTemp = resourceTemp
 		i.TemplateRaw.GitIgnore = gitignore
+		switch i.TerraformPluginFramework {
+		case false:
+			i.TemplateRaw.ProviderTemp = providerTemp
+			i.TemplateRaw.DataTemp = dataSourceTemp
+			i.TemplateRaw.ResourceTemp = resourceTemp
+		case true:
+			i.TemplateRaw.ProviderTemp = providerV2Temp
+			i.TemplateRaw.DataTemp = dataSourceV2Temp
+			i.TemplateRaw.ResourceTemp = resourceV2Temp
+		}
 	}
 }
 

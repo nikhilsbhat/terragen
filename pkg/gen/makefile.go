@@ -44,6 +44,22 @@ func (m *Make) Create() error {
 	return nil
 }
 
+func (m *Make) Scaffolded() bool {
+	return false
+}
+
+func (m *Make) GetUpdated() error {
+	return nil
+}
+
+func (m *Make) Update() error {
+	return nil
+}
+
+func (m *Make) Get(currentContent []byte) ([]byte, error) {
+	return nil, nil
+}
+
 func NewMake(i *Input) *Make {
 	return &Make{
 		DryRun:   i.DryRun,

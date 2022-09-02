@@ -49,6 +49,18 @@ func (m *Main) Scaffolded() bool {
 	return false
 }
 
+func (m *Main) GetUpdated() error {
+	return nil
+}
+
+func (m *Main) Update() error {
+	return nil
+}
+
+func (m *Main) Get(currentContent []byte) ([]byte, error) {
+	return nil, nil
+}
+
 func NewMain(i *Input) *Main {
 	return &Main{
 		DryRun:         i.DryRun,

@@ -12,8 +12,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//go:embed templates/datasource.tmpl
-var dataSourceTemp string
+var (
+	//go:embed templates/datasource.tmpl
+	dataSourceTemp string
+	//go:embed templates/datasource_v2.tmpl
+	dataSourceV2Temp string
+)
 
 type DataSource struct {
 	Path           string
@@ -120,6 +124,18 @@ func (d *DataSource) Scaffolded() bool {
 	}
 
 	return false
+}
+
+func (d *DataSource) GetUpdated() error {
+	return nil
+}
+
+func (d *DataSource) Update() error {
+	return nil
+}
+
+func (d *DataSource) Get(currentContent []byte) ([]byte, error) {
+	return nil, nil
 }
 
 func NewDataSource(i *Input) *DataSource {

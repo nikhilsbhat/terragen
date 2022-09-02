@@ -13,7 +13,7 @@ type Terragen interface {
 	Create() error
 	Scaffolded() bool
 	Update() error
-	Get(currentProvider []byte) ([]byte, error)
+	Get(currentContent []byte) ([]byte, error)
 	GetUpdated() error
 }
 
@@ -109,6 +109,10 @@ func (i *Input) Generate(cmd *cobra.Command, args []string) {
 	i.setInputs()
 	i.Provider = args[0]
 	i.mod = i.setMod()
+
+	if i.TerraformPluginFramework {
+		log.Println(ui.Info("plugin-framework is enabled, scaffold would be generated using https://github.com/hashicorp/terraform-provider-scaffolding-framework"))
+	}
 
 	if !i.SkipValidation {
 		if !validatePrerequisite() {

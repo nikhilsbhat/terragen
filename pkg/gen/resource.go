@@ -12,8 +12,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//go:embed templates/resource.tmpl
-var resourceTemp string
+var (
+	//go:embed templates/resource.tmpl
+	resourceTemp string
+	//go:embed templates/resource_v2.tmpl
+	resourceV2Temp string
+)
 
 type Resource struct {
 	Path           string
@@ -119,6 +123,18 @@ func (r *Resource) Scaffolded() bool {
 	}
 
 	return false
+}
+
+func (r *Resource) GetUpdated() error {
+	return nil
+}
+
+func (r *Resource) Update() error {
+	return nil
+}
+
+func (r *Resource) Get(currentContent []byte) ([]byte, error) {
+	return nil, nil
 }
 
 func NewResource(i *Input) *Resource {

@@ -55,6 +55,18 @@ func (g *Git) Scaffolded() bool {
 	return false
 }
 
+func (g *Git) GetUpdated() error {
+	return nil
+}
+
+func (g *Git) Update() error {
+	return nil
+}
+
+func (g *Git) Get(currentContent []byte) ([]byte, error) {
+	return nil, nil
+}
+
 func NewGit(i *Input) *Git {
 	return &Git{
 		DryRun:    i.DryRun,

@@ -14,8 +14,12 @@ import (
 	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
-//go:embed templates/provider.tmpl
-var providerTemp string
+var (
+	//go:embed templates/provider.tmpl
+	providerTemp string
+	//go:embed templates/provider_v2.tmpl
+	providerV2Temp string
+)
 
 type Provider struct {
 	Provider       string
@@ -78,14 +82,14 @@ func (p *Provider) Update() error {
 	return nil
 }
 
-func (p *Provider) Get(currentProvider []byte) ([]byte, error) {
+func (p *Provider) Get(currentContent []byte) ([]byte, error) {
 	updatedProvider, err := renderTemplate(terragenProvider, p.ProviderTemp, p)
 	if err != nil {
 		return nil, err
 	}
 
 	dmp := diffmatchpatch.New()
-	providerDiff := dmp.DiffMain(string(currentProvider), string(updatedProvider), false)
+	providerDiff := dmp.DiffMain(string(currentContent), string(updatedProvider), false)
 	return []byte(dmp.DiffText2(providerDiff)), nil
 }
 
