@@ -33,6 +33,7 @@ func GetBuildInfo() BuildInfo {
 	if strings.ToLower(Env) != "production" {
 		Env = "alfa"
 	}
+
 	return BuildInfo{
 		Version:     Version,
 		Revision:    Revision,

@@ -32,6 +32,7 @@ func getTerragenCommands() *cobra.Command {
 	command.commands = append(command.commands, getCreateCommand())
 	command.commands = append(command.commands, getVersionCommand())
 	command.commands = append(command.commands, getEditCommand())
+
 	return command.prepareCommands()
 }
 
@@ -41,6 +42,7 @@ func (c *terragenCommands) prepareCommands() *cobra.Command {
 		rootCmd.AddCommand(cmnd)
 	}
 	registerFlags("terragen", rootCmd)
+
 	return rootCmd
 }
 
@@ -53,6 +55,7 @@ func getRootCommand() *cobra.Command {
 		RunE:  cm.echoTerragen,
 	}
 	rootCommand.SetUsageTemplate(getUsageTemplate())
+
 	return rootCommand
 }
 
@@ -68,6 +71,7 @@ func getCreateCommand() *cobra.Command {
 	for _, command := range createCommands {
 		createCommand.AddCommand(command)
 	}
+
 	return createCommand
 }
 
@@ -83,6 +87,7 @@ func getEditCommand() *cobra.Command {
 	for _, command := range editCommands {
 		editCommand.AddCommand(command)
 	}
+
 	return editCommand
 }
 
@@ -99,6 +104,7 @@ func (cm *cliMeta) echoTerragen(cmd *cobra.Command, args []string) error {
 	if err := cmd.Usage(); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -109,6 +115,7 @@ func versionConfig(cmd *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 	fmt.Println("terragen version:", string(buildInfo))
+
 	return nil
 }
 

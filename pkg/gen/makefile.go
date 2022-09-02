@@ -1,18 +1,18 @@
 package gen
 
 import (
+	// makefile template has to be sourced from template.
 	_ "embed"
 	"fmt"
-	"github.com/nikhilsbhat/neuron/cli/ui"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
-var (
-	//go:embed templates/makefile.tmpl
-	makefileTemplate string
-)
+//go:embed templates/makefile.tmpl
+var makefileTemplate string
 
 type Make struct {
 	DryRun   bool
@@ -24,21 +24,21 @@ func (m *Make) Create() error {
 	makeFile := filepath.Join(m.Path, terragenMakefile)
 	makeFileData, err := renderTemplate(terragenMakefile, makefileTemplate, m)
 	if err != nil {
-		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terragenMakefile, err)
+		return fmt.Errorf("oops rendering povider component %s errored with: %w ", terragenMakefile, err)
 	}
 
 	if m.DryRun {
 		log.Print(ui.Info(fmt.Sprintf("Makefile would be created under %s", m.Path)))
 		log.Println(ui.Info("contents of Makefile source looks like"))
 		printData(makeFileData)
+
 		return nil
-	} else {
-		if err = terragenFileCreate(makeFile); err != nil {
-			return err
-		}
-		if err = os.WriteFile(filepath.Join(m.Path, terragenMakefile), makeFileData, scaffoldPerm); err != nil {
-			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terragenMakefile, err)
-		}
+	}
+	if err = terragenFileCreate(makeFile); err != nil {
+		return err
+	}
+	if err = os.WriteFile(filepath.Join(m.Path, terragenMakefile), makeFileData, scaffoldPerm); err != nil {
+		return fmt.Errorf("oops scaffolding povider component %s errored with: %w ", terragenMakefile, err)
 	}
 
 	return nil

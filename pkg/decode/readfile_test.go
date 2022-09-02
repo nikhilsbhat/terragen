@@ -1,9 +1,11 @@
-package decode
+package decode_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/nikhilsbhat/terragen/pkg/decode"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,13 +28,13 @@ importers:
 
 		path, err := getFixturesPath()
 		assert.NoError(t, err)
-		actual, err := ReadFile(path)
+		actual, err := decode.ReadFile(path)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, string(actual))
 	})
 
 	t.Run("should return file not found error", func(t *testing.T) {
-		path, err := ReadFile("gen/fixtures/terragen-test.yml")
+		path, err := decode.ReadFile("gen/fixtures/terragen-test.yml")
 		assert.EqualError(t, err, "stat gen/fixtures/terragen-test.yml: no such file or directory")
 		assert.Nil(t, path)
 	})
@@ -43,5 +45,6 @@ func getFixturesPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return filepath.Join(filepath.Dir(dir), "gen/fixtures/terragen-test.yml"), nil
 }

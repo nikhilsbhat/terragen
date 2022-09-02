@@ -1,7 +1,7 @@
-package gen
+package gen //nolint:testpackage
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/nikhilsbhat/terragen/version"
@@ -80,7 +80,7 @@ func Test_snakeCaseToCamelCase(t *testing.T) {
 }
 
 func mockGetMetadata(path string) (*Config, error) {
-	metaData, err := ioutil.ReadFile(path)
+	metaData, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

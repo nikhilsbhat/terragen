@@ -24,6 +24,7 @@ func (i *Input) setMod() string {
 	if len(i.RepoGroup) == 0 {
 		i.RepoGroup = i.Provider
 	}
+
 	return fmt.Sprintf("%s/terraform-provider-%s", i.RepoGroup, i.Provider)
 }
 
@@ -49,26 +50,27 @@ func (i *Input) enrichNames() {
 
 func snakeCaseToCamelCase(input string) (camelCase string) {
 	isToUpper := false
-	for k, v := range input {
-		if k == 0 {
+	for key, value := range input {
+		if key == 0 { //nolint:nestif
 			camelCase = strings.ToLower(string(input[0]))
 		} else {
 			if isToUpper {
-				camelCase += strings.ToUpper(string(v))
+				camelCase += strings.ToUpper(string(value))
 				isToUpper = false
 			} else {
-				if v == '_' {
+				if value == '_' {
 					isToUpper = true
 				} else {
-					camelCase += string(v)
+					camelCase += string(value)
 				}
 			}
 		}
 	}
+
 	return
 }
 
-func lockTerragenExecution(currentVersion string, force bool) (old, new string, lock bool, err error) {
+func lockTerragenExecution(currentVersion string, force bool) (oldVer, newVer string, lock bool, err error) {
 	if force {
 		return "", "", false, nil
 	}
@@ -91,6 +93,7 @@ func lockTerragenExecution(currentVersion string, force bool) (old, new string, 
 	if runnigTerragenVersion.LessThan(oldTerragenVersion) {
 		return oldTerragenVersion.String(), runnigTerragenVersion.String(), true, nil
 	}
+
 	return oldTerragenVersion.String(), runnigTerragenVersion.String(), false, nil
 }
 

@@ -12,6 +12,7 @@ func Contains(s []string, searchTerm string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -23,5 +24,6 @@ func HasChange(slice1, slice2 []string) bool {
 func byts(slice []string) []byte {
 	buf := &bytes.Buffer{}
 	gob.NewEncoder(buf).Encode(slice) //nolint:errcheck
+
 	return buf.Bytes()
 }

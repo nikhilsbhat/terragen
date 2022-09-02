@@ -1,6 +1,7 @@
 package gen
 
 import (
+	// main.go template has to be sourced from template.
 	_ "embed"
 	"fmt"
 	"log"
@@ -26,22 +27,23 @@ func (m *Main) Create() error {
 	mainFile := filepath.Join(m.Path, terragenMain)
 	mainData, err := renderTemplate(terragenMain, m.RootTemp, m)
 	if err != nil {
-		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terragenMain, err)
+		return fmt.Errorf("oops rendering povider component %s errored with: %w ", terragenMain, err)
 	}
 
 	if m.DryRun {
 		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terragenMain, m.Path)))
 		log.Println(ui.Info("contents of main.go looks like"))
 		printData(mainData)
+
 		return nil
-	} else {
-		if err = terragenFileCreate(mainFile); err != nil {
-			return err
-		}
-		if err = os.WriteFile(filepath.Join(m.Path, terragenMain), mainData, scaffoldPerm); err != nil {
-			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terragenMain, err)
-		}
 	}
+	if err = terragenFileCreate(mainFile); err != nil {
+		return err
+	}
+	if err = os.WriteFile(filepath.Join(m.Path, terragenMain), mainData, scaffoldPerm); err != nil {
+		return fmt.Errorf("oops scaffolding povider component %s errored with: %w ", terragenMain, err)
+	}
+
 	return nil
 }
 

@@ -1,8 +1,10 @@
-package decode
+package decode_test
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/nikhilsbhat/terragen/pkg/decode"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +20,7 @@ func TestJSONDecode(t *testing.T) {
 
 		expected := &testStruct{Age: 30, Name: "John"}
 
-		err := JSONDecode([]byte(jsonData), name)
+		err := decode.JSONDecode([]byte(jsonData), name)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, name)
 	})
@@ -30,7 +32,7 @@ func TestJSONDecode(t *testing.T) {
 		expectedErr := "error occurred at line 1, json: cannot unmarshal number into Go struct field testStruct.name of type " +
 			"string\n{\"name\":30, \"age\":30}\nThe data type you entered for the value is wrong"
 
-		err := JSONDecode([]byte(jsonData), name)
+		err := decode.JSONDecode([]byte(jsonData), name)
 		assert.EqualError(t, err, expectedErr)
 	})
 
@@ -41,7 +43,7 @@ func TestJSONDecode(t *testing.T) {
 
 		expectedErr := "error occurred at line 1, unexpected end of JSON input\n{\"name\":30, \"age:30}"
 
-		err := JSONDecode([]byte(jsonData), name)
+		err := decode.JSONDecode([]byte(jsonData), name)
 		assert.EqualError(t, err, expectedErr)
 		assert.Equal(t, name, expected)
 	})
@@ -49,10 +51,10 @@ func TestJSONDecode(t *testing.T) {
 
 func TestGetStringOfMessage(t *testing.T) {
 	t.Run("should return string of error message", func(t *testing.T) {
-		customErr := fmt.Errorf("this is a error message")
+		customErr := fmt.Errorf("this is a error message") //nolint:goerr113
 		expected := "this is a error message"
 
-		actual := GetStringOfMessage(customErr)
+		actual := decode.GetStringOfMessage(customErr)
 		assert.Equal(t, expected, actual)
 	})
 }

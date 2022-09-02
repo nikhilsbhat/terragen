@@ -16,6 +16,7 @@ import (
 
 func terragenFileCreate(path string) error {
 	_, err := os.Create(path)
+
 	return err
 }
 
@@ -48,6 +49,7 @@ func (i *Input) setupTerragen() error {
 	goTidy.Dir = i.Path
 	if err := goTidy.Run(); err != nil {
 		log.Println(ui.Error(err.Error()))
+
 		return err
 	}
 
@@ -56,6 +58,7 @@ func (i *Input) setupTerragen() error {
 	if err := goVnd.Run(); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -64,6 +67,7 @@ func (i *Input) genTerraDir() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -92,6 +96,7 @@ func (i *Input) getPath() string {
 			fmt.Println(ui.Error(err.Error()))
 			os.Exit(1)
 		}
+
 		return dir
 	}
 	path, err := filepath.Abs(i.Path)
@@ -99,6 +104,7 @@ func (i *Input) getPath() string {
 		fmt.Println(ui.Error(err.Error()))
 		os.Exit(1)
 	}
+
 	return path
 }
 
@@ -108,6 +114,7 @@ func renderTemplate(templateName, temp string, data interface{}) ([]byte, error)
 	if err := tmpl.Execute(&templateWriter, data); err != nil {
 		return nil, err
 	}
+
 	return templateWriter.Bytes(), nil
 }
 
@@ -155,5 +162,6 @@ func validatePrerequisite() bool {
 
 		return success
 	}
+
 	return success
 }

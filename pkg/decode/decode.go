@@ -10,10 +10,10 @@ import (
 // JSONDecode decodes the data to json sent to it.
 func JSONDecode(data []byte, i interface{}) error {
 	if err := json.Unmarshal(data, i); err != nil {
-		switch err.(type) {
-		case *json.UnmarshalTypeError:
+		switch err.(type) { //nolint:errorlint
+		case *json.UnmarshalTypeError: //nolint:errorlint
 			return unknownTypeError(data, err)
-		case *json.SyntaxError:
+		case *json.SyntaxError: //nolint:errorlint
 			return syntaxError(data, err)
 		}
 	}
@@ -22,7 +22,7 @@ func JSONDecode(data []byte, i interface{}) error {
 }
 
 func syntaxError(data []byte, err error) error {
-	syntaxErr, ok := err.(*json.SyntaxError)
+	syntaxErr, ok := err.(*json.SyntaxError) //nolint:errorlint
 	if !ok {
 		return err
 	}
@@ -37,13 +37,14 @@ func syntaxError(data []byte, err error) error {
 
 	line := bytes.Count(data[:start], newline) + 1
 
-	err = fmt.Errorf("error occurred at line %d, %s\n%s",
+	err = fmt.Errorf("error occurred at line %d, %w\n%s",
 		line, syntaxErr, data[start:end])
+
 	return err
 }
 
 func unknownTypeError(data []byte, err error) error {
-	unknownTypeErr, ok := err.(*json.UnmarshalTypeError)
+	unknownTypeErr, ok := err.(*json.UnmarshalTypeError) //nolint:errorlint
 	if !ok {
 		return err
 	}
@@ -58,12 +59,13 @@ func unknownTypeError(data []byte, err error) error {
 
 	line := bytes.Count(data[:start], newline) + 1
 
-	err = fmt.Errorf("error occurred at line %d, %s\n%s\nThe data type you entered for the value is wrong",
+	err = fmt.Errorf("error occurred at line %d, %w\n%s\nThe data type you entered for the value is wrong",
 		line, unknownTypeErr, data[start:end])
+
 	return err
 }
 
-// GetStringOfMessage returns string form of error
+// GetStringOfMessage returns string form of error.
 func GetStringOfMessage(g interface{}) string {
 	switch typ := g.(type) {
 	case string:

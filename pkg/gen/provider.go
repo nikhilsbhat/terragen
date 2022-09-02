@@ -1,9 +1,9 @@
 package gen
 
 import (
+	// provider template has to be sourced from template.
 	_ "embed"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -45,18 +45,18 @@ func (p *Provider) Create() error {
 		log.Println(ui.Info(fmt.Sprintf("provider '%s' would be created under '%s'", p.Provider, p.Path)))
 		log.Println(ui.Info("contents of provider looks like"))
 		printData(providerData)
+
 		return nil
-	} else {
-		if err = os.WriteFile(provideFile, providerData, scaffoldPerm); err != nil {
-			return fmt.Errorf("oops scaffolding provider %s errored with: %v ", p.Provider, err)
-		}
+	}
+	if err = os.WriteFile(provideFile, providerData, scaffoldPerm); err != nil {
+		return fmt.Errorf("oops scaffolding provider %s errored with: %w ", p.Provider, err)
 	}
 
 	return nil
 }
 
 func (p *Provider) Update() error {
-	currentProvider, err := ioutil.ReadFile(filepath.Join(p.Path, p.Provider, terragenProvider))
+	currentProvider, err := os.ReadFile(filepath.Join(p.Path, p.Provider, terragenProvider))
 	if err != nil {
 		return err
 	}
@@ -79,6 +79,7 @@ func (p *Provider) Update() error {
 	if err = os.WriteFile(providerFile, updateData, scaffoldPerm); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -90,6 +91,7 @@ func (p *Provider) Get(currentContent []byte) ([]byte, error) {
 
 	dmp := diffmatchpatch.New()
 	providerDiff := dmp.DiffMain(string(currentContent), string(updatedProvider), false)
+
 	return []byte(dmp.DiffText2(providerDiff)), nil
 }
 
@@ -100,6 +102,7 @@ func (p *Provider) GetUpdated() error {
 	}
 	p.DataSource = append(p.DataSource, metadata.DataSources...)
 	p.Resource = append(p.Resource, metadata.Resources...)
+
 	return nil
 }
 
@@ -110,8 +113,10 @@ func (p *Provider) Scaffolded() bool {
 	metadata, err := getCurrentMetadata(filepath.Join(p.Path, terragenMetadata))
 	if err != nil {
 		log.Println(ui.Error(err.Error()))
+
 		return true
 	}
+
 	return p.Provider == metadata.Provider
 }
 

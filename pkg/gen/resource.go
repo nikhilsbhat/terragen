@@ -1,6 +1,7 @@
 package gen
 
 import (
+	// resource template has to be sourced from template.
 	_ "embed"
 	"fmt"
 	"log"
@@ -90,22 +91,23 @@ func (r *Resource) Create() error {
 
 		resourceData, err := renderTemplate(terragenResource, r.ResourceTemp, data)
 		if err != nil {
-			return fmt.Errorf("oops rendering resource %s errored with: %v ", currentResource, err)
+			return fmt.Errorf("oops rendering resource %s errored with: %w ", currentResource, err)
 		}
 
 		if r.DryRun {
 			log.Println(ui.Info("contents of resource looks like"))
 			printData(resourceData)
+
 			return nil
-		} else {
-			if err = terragenFileCreate(resourceFile); err != nil {
-				return fmt.Errorf("oops creating resource errored with: %v ", err)
-			}
-			if err = os.WriteFile(resourceFile, resourceData, scaffoldPerm); err != nil {
-				return fmt.Errorf("oops scaffolding resource %s errored with: %v ", currentResource, err)
-			}
+		}
+		if err = terragenFileCreate(resourceFile); err != nil {
+			return fmt.Errorf("oops creating resource errored with: %w ", err)
+		}
+		if err = os.WriteFile(resourceFile, resourceData, scaffoldPerm); err != nil {
+			return fmt.Errorf("oops scaffolding resource %s errored with: %w ", currentResource, err)
 		}
 	}
+
 	return nil
 }
 
@@ -113,6 +115,7 @@ func (r *Resource) Scaffolded() bool {
 	currentMetaData, err := getCurrentMetadata(filepath.Join(r.Path, terragenMetadata))
 	if err != nil {
 		log.Println(ui.Error(err.Error()))
+
 		return false
 	}
 

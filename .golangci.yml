@@ -15,6 +15,11 @@ linters:
     - cyclop
     - ireturn
     - dupl
+    - wrapcheck
+    - varnamelen
+    - nonamedreturns
+    - gochecknoinits
+    - nosnakecase
 
 issues:
   exclude-rules:

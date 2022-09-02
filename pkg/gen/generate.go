@@ -21,56 +21,58 @@ type Scaffold interface {
 	Generate(cmd *cobra.Command, args []string)
 }
 
-// Input holds the required values to generate the templates
+// Input holds the required values to generate the templates.
 type Input struct {
+	// DryRun simulates scaffold creation by not creating one
+	DryRun bool
+	// Force will forcefully scaffold the datasource/resource by not validating the terragen version.
+	// Enabling this might tamper the scaffolds.
+	Force bool
+	// SkipValidation will skip validating all the prerequisites such as checking go,goimports etc.
+	SkipValidation bool
+	// TerraformPluginFramework would generate scaffolds
+	// with terraform-plugin-framework(https://github.com/hashicorp/terraform-plugin-framework).
+	TerraformPluginFramework bool
+	// ResourceRequired determines if resource to be created while generating scaffolds.
+	// Enabling this wth no resource name is not accepted.
+	ResourceRequired bool
+	// DatasourceRequired determines if data_source to be created while generating scaffolds.
+	// Enabling this wth no data_source name is not accepted.
+	DatasourceRequired bool
+	// ImporterRequired determines if importer to be created while generating scaffolds.
+	// Enabling this wth no importer name is not accepted.
+	ImporterRequired bool
+	// Importer to be created while generating scaffolds,
+	// by passing a resource name here, it auto enabled ImporterRequired.
+	Importer string
+	// Provider name of which the scaffolds to be created, defaults to terraform-provider-demo
+	Provider string
+	// Path defines where the templates has to be generated.
+	Path string
+	// AutoGenMessage will be configured by terragen and cannot be overwritten.
+	AutoGenMessage string
+	// Description to be added to resource/datasource.
+	Description string
+	// RepoGroup is used while creating go mod. Defaults to 'github.com/test/'
+	// For a given provider, repo group would be appended.
+	// Ex: For provider 'demo' the go mod would look like 'github.com/test/demo'
 	// Resource to be created while generating scaffolds,
 	// by passing a resource name here, it auto enabled ResourceRequired.
 	// Provider name would be appended while constructing final resource name.
 	// EX: resource 'create_cluster' for provider demo would become 'demo_create_cluster'.
 	Resource []string
-	// ResourceRequired determines if resource to be created while generating scaffolds.
-	// Enabling this wth no resource name is not accepted.
-	ResourceRequired bool
 	// DataSource to be created while generating scaffolds,
 	// by passing a resource name here, it auto enabled DatasourceRequired.
 	// Provider name would be appended while constructing final data_source name.
 	// EX: resource 'load_image' for provider demo would become 'demo_load_image'.
 	DataSource []string
-	// DatasourceRequired determines if data_source to be created while generating scaffolds.
-	// Enabling this wth no data_source name is not accepted.
-	DatasourceRequired bool
-	// Importer to be created while generating scaffolds,
-	// by passing a resource name here, it auto enabled ImporterRequired.
-	Importer string
-	// ImporterRequired determines if importer to be created while generating scaffolds.
-	// Enabling this wth no importer name is not accepted.
-	ImporterRequired bool
-	// Provider name of which the scaffolds to be created, defaults to terraform-provider-demo
-	Provider string
 	// List of all the dependent packages for terraform, if not passed it picks default.
 	Dependents []string
-	// Path defines where the templates has to be generated.
-	Path string
 	// TemplateRaw consists of go-templates which are the core for terragen.
-	TemplateRaw TerraTemplate
-	// AutoGenMessage will be configured by terragen and cannot be overwritten.
-	AutoGenMessage string
-	// Description to be added to resource/datasource
-	Description string
-	// DryRun simulates scaffold creation by not creating one
-	DryRun bool
-	// RepoGroup is used while creating go mod. Defaults to 'github.com/test/'
-	// For a given provider, repo group would be appended.
-	// Ex: For provider 'demo' the go mod would looks 'github.com/test/demo'
-	RepoGroup string
-	// Force will forcefully scaffold the datasource/resource by not validating the terragen version.
-	// Enabling this might tamper the scaffolds
-	Force bool
-	// SkipValidation will skip validating all the prerequisites such as checking go,goimports etc.
-	SkipValidation           bool
-	TerraformPluginFramework bool
-	mod                      string
-	metaDataPath             string
+	TemplateRaw  TerraTemplate
+	RepoGroup    string
+	mod          string
+	metaDataPath string
 }
 
 // TerraTemplate are the collections of go-templates which are used to generate terraform provider's base template.
@@ -111,7 +113,8 @@ func (i *Input) Generate(cmd *cobra.Command, args []string) {
 	i.mod = i.setMod()
 
 	if i.TerraformPluginFramework {
-		log.Println(ui.Info("plugin-framework is enabled, scaffold would be generated using https://github.com/hashicorp/terraform-provider-scaffolding-framework"))
+		log.Println(ui.Info("plugin-framework is enabled, " +
+			"scaffold would be generated using https://github.com/hashicorp/terraform-provider-scaffolding-framework"))
 	}
 
 	if !i.SkipValidation {

@@ -1,6 +1,7 @@
 package gen
 
 import (
+	// git template has to be sourced from template.
 	_ "embed"
 	"fmt"
 	"log"
@@ -26,21 +27,21 @@ func (g *Git) Create() error {
 	mainFile := filepath.Join(g.Path, terrgenGitIgnore)
 	gitIgnoreData, err := renderTemplate(terrgenGitIgnore, g.GitIgnore, g)
 	if err != nil {
-		return fmt.Errorf("oops rendering povider component %s errored with: %v ", terrgenGitIgnore, err)
+		return fmt.Errorf("oops rendering povider component %s errored with: %w ", terrgenGitIgnore, err)
 	}
 
 	if g.DryRun {
 		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terrgenGitIgnore, g.Path)))
 		log.Println(ui.Info("contents of gitignore looks like"))
 		printData(gitIgnoreData)
+
 		return nil
-	} else {
-		if err = terragenFileCreate(mainFile); err != nil {
-			return err
-		}
-		if err = os.WriteFile(filepath.Join(g.Path, terrgenGitIgnore), gitIgnoreData, scaffoldPerm); err != nil {
-			return fmt.Errorf("oops scaffolding povider component %s errored with: %v ", terrgenGitIgnore, err)
-		}
+	}
+	if err = terragenFileCreate(mainFile); err != nil {
+		return err
+	}
+	if err = os.WriteFile(filepath.Join(g.Path, terrgenGitIgnore), gitIgnoreData, scaffoldPerm); err != nil {
+		return fmt.Errorf("oops scaffolding povider component %s errored with: %w ", terrgenGitIgnore, err)
 	}
 
 	_, err = git.PlainInit(g.Path, false)

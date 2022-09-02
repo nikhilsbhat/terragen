@@ -39,7 +39,7 @@ func (i *Input) CreateOrUpdateMetadata() error {
 	metaDataPath := filepath.Join(i.Path, terragenMetadata)
 
 	var metadata *Config
-	if i.MetadataScaffolded() {
+	if i.MetadataScaffolded() { //nolint:nestif
 		currentMetaData, err := getCurrentMetadata(i.metaDataPath)
 		if err != nil {
 			return err
@@ -47,7 +47,7 @@ func (i *Input) CreateOrUpdateMetadata() error {
 
 		newMetaData := i.getMetadata()
 		if newMetaData.Provider != currentMetaData.Provider {
-			return fmt.Errorf("renaming provider is not supported once scaffolds are created")
+			return fmt.Errorf("renaming provider is not supported once scaffolds are created") //nolint:goerr113
 		}
 		if utils.HasChange(currentMetaData.Resources, newMetaData.Resources) {
 			currentMetaData.Resources = append(currentMetaData.Resources, newMetaData.Resources...)
@@ -74,6 +74,7 @@ func (i *Input) CreateOrUpdateMetadata() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -81,6 +82,7 @@ func (i *Input) MetadataScaffolded() bool {
 	if _, fileErr := os.Stat(i.metaDataPath); os.IsNotExist(fileErr) {
 		return false
 	}
+
 	return true
 }
 
@@ -101,6 +103,7 @@ func getMetaWriter(path string) (*os.File, error) {
 	if _, fileErr := os.Stat(path); os.IsNotExist(fileErr) {
 		return os.Create(path)
 	}
+
 	return os.OpenFile(path, os.O_WRONLY, os.ModeAppend)
 }
 
@@ -113,6 +116,7 @@ func getCurrentMetadata(path string) (*Config, error) {
 	if err = yaml.Unmarshal(meta, &metadata); err != nil {
 		return nil, err
 	}
+
 	return &metadata, nil
 }
 
