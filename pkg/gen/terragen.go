@@ -72,6 +72,8 @@ func (i *Input) getTemplate() {
 	if reflect.DeepEqual(i.TemplateRaw, TerraTemplate{}) {
 		i.TemplateRaw.RootTemp = mainTemp
 		i.TemplateRaw.GitIgnore = gitignore
+		i.TemplateRaw.GolangCILint = golangCILint
+		i.TemplateRaw.GoReleaser = goReleaser
 		switch i.TerraformPluginFramework {
 		case false:
 			i.TemplateRaw.ProviderTemp = providerTemp

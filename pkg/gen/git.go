@@ -37,15 +37,16 @@ func (g *Git) Create() error {
 
 		return nil
 	}
+
 	if err = terragenFileCreate(mainFile); err != nil {
 		return err
 	}
+
 	if err = os.WriteFile(filepath.Join(g.Path, terrgenGitIgnore), gitIgnoreData, scaffoldPerm); err != nil {
 		return fmt.Errorf("oops scaffolding povider component %s errored with: %w ", terrgenGitIgnore, err)
 	}
 
-	_, err = git.PlainInit(g.Path, false)
-	if err != nil {
+	if _, err = git.PlainInit(g.Path, false); err != nil {
 		return err
 	}
 

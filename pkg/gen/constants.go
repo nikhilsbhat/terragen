@@ -8,4 +8,6 @@ const (
 	terragenMakefile   = "Makefile"
 	terragenMetadata   = "terragen.yml"
 	terrgenGitIgnore   = ".gitignore"
+	terragenReleaser   = ".goreleaser.yml"
+	terragenCILinter   = ".golangci-lint.yml"
 )

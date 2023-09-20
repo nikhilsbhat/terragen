@@ -86,15 +86,19 @@ type Input struct {
 // TerraTemplate are the collections of go-templates which are used to generate terraform provider's base template.
 type TerraTemplate struct {
 	// ProviderTemp holds the template for provider
-	ProviderTemp string `json:"provider-template" yaml:"provider-template"`
+	ProviderTemp string `json:"provider-template,omitempty" yaml:"provider-template,omitempty"`
 	// RootTemp holds the template for root file
-	RootTemp string `json:"root-template" yaml:"provider-template"`
+	RootTemp string `json:"root-template,omitempty" yaml:"provider-template,omitempty"`
 	// DataTemp holds the template for data
-	DataTemp string `json:"data-template" yaml:"data-template"`
+	DataTemp string `json:"data-template,omitempty" yaml:"data-template,omitempty"`
 	// ResourceTemp holds the template for resource
-	ResourceTemp string `json:"resource-template" yaml:"resource-template"`
+	ResourceTemp string `json:"resource-template,omitempty" yaml:"resource-template,omitempty"`
 	// GitIgnore that where scaffolded.
-	GitIgnore string `json:"gitignore" yaml:"gitignore"`
+	GitIgnore string `json:"gitignore,omitempty" yaml:"gitignore,omitempty"`
+	// GolangCILint that where scaffolded.
+	GolangCILint string `json:"golang-ci-lint,omitempty" yaml:"golang-ci-lint,omitempty"`
+	// GoReleaser that where scaffolded.
+	GoReleaser string `json:"go-releaser,omitempty" yaml:"go-releaser,omitempty"`
 }
 
 var autoGenMessage = `// ----------------------------------------------------------------------------
@@ -180,6 +184,10 @@ func (i *Input) Generate(providerName string) error {
 
 	if err := NewGit(i).Create(); err != nil {
 		return fmt.Errorf("creating scaffolds for 'gitignore' errored with '%s'", err.Error())
+	}
+
+	if err := NewReleaseNLinter(i).Create(); err != nil {
+		return fmt.Errorf("creating scaffolds for 'goreleaser' and 'golangci-lint' errored with '%s'", err.Error())
 	}
 
 	if !i.DryRun {

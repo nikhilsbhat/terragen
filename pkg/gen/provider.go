@@ -47,6 +47,7 @@ func (p *Provider) Create() error {
 
 		return nil
 	}
+
 	if err = os.WriteFile(provideFile, providerData, scaffoldPerm); err != nil {
 		return fmt.Errorf("oops scaffolding provider %s errored with: %w ", p.Provider, err)
 	}

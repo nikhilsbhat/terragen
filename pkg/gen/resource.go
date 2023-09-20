@@ -65,7 +65,8 @@ func (i *Input) GenerateResource(resources []string) error {
 			return err
 		}
 
-		i.logger.Fatalf("terragen version '%v' or greater is required cannot scaffold more with terragen version '%v', it might breaks the project", oldVer, newVer)
+		i.logger.Fatalf("terragen version '%v' or greater is required cannot scaffold more with terragen version '%v', "+
+			"it might breaks the project", oldVer, newVer)
 
 		return fmt.Errorf("errored while checking the version compatibility of Terragen on the scaffolds")
 	}

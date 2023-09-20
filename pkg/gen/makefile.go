@@ -34,9 +34,11 @@ func (m *Make) Create() error {
 
 		return nil
 	}
+
 	if err = terragenFileCreate(makeFile); err != nil {
 		return err
 	}
+
 	if err = os.WriteFile(filepath.Join(m.Path, terragenMakefile), makeFileData, scaffoldPerm); err != nil {
 		return fmt.Errorf("oops scaffolding povider component %s errored with: %w ", terragenMakefile, err)
 	}
