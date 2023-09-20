@@ -40,6 +40,8 @@ func (c *terragenCommands) prepareCommands() *cobra.Command {
 	for _, cmnd := range c.commands {
 		rootCmd.AddCommand(cmnd)
 	}
+
+	rootCmd.SilenceErrors = true
 	registerFlags("terragen", rootCmd)
 
 	return rootCmd
@@ -67,7 +69,11 @@ func getCreateCommand() *cobra.Command {
 		RunE:    echoTerragen,
 	}
 	registerFlags("create", createCommand)
+
+	createCommand.SetUsageTemplate(getUsageTemplate())
+
 	for _, command := range createCommands {
+		command.SilenceUsage = true
 		createCommand.AddCommand(command)
 	}
 
@@ -83,6 +89,9 @@ func getEditCommand() *cobra.Command {
 		RunE:    echoTerragen,
 	}
 	registerFlags("edit", editCommand)
+
+	editCommand.SetUsageTemplate(getUsageTemplate())
+
 	for _, command := range editCommands {
 		command.SilenceUsage = true
 		editCommand.AddCommand(command)

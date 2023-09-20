@@ -12,7 +12,7 @@ How about accelerating the development of such custom-provider with the scaffold
 Supports the addition of new scaffolds of `data_source` and `resource` for a specific Terraform `provider` as and when required.  
 ## Requirements
 
-* [Go](https://golang.org/dl/) 1.12 or above . Installing go can be found [here](https://golang.org/doc/install).
+* [Go](https://golang.org/dl/) 1.19 or above . Installing go can be found [here](https://golang.org/doc/install).
 * Basic understanding of terraform provider and [building](https://www.terraform.io/docs/extend/writing-custom-providers.html) them.
 
 ## Installation
@@ -32,6 +32,21 @@ Supports the addition of new scaffolds of `data_source` and `resource` for a spe
 ## Documentation
 
 * Document of `Terragen` on its usage is up [here](https://nikhilsbhat.github.io/terragen).
+* Updated documentation on all available commands and flags can be found [here](https://github.com/nikhilsbhat/terragen/blob/master/cli_docs/doc/terragen.md).
+
+## Installation
+
+* Recommend installing released versions. Release binaries are available on the [releases](https://github.com/nikhilsbhat/terragen/releases) page and docker from [here](https://hub.docker.com/repository/docker/basnik/terragen).
+* Can always build it locally by running `go build` against cloned repo.
+
+#### Docker
+
+Latest version of docker images are published to [ghcr.io](https://github.com/nikhilsbhat/terragen/pkgs/container/terragen), all available images can be found there. </br>
+
+```bash
+docker pull ghcr.io/nikhilsbhat/terragen:latest
+docker pull ghcr.io/nikhilsbhat/terragen:<github-release-tag>
+```
 
 ## TODO
 * [ ] Edit feature to cover more aspect.

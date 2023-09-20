@@ -41,23 +41,11 @@ local.push: local.build ## Pushes built artifact to the specified location
 local.run: local.build ## Generates the artifact and start the service in the current directory
 	./${APP_NAME}
 
-publish: local.check ## Builds and publishes the app
-	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser release --rm-dist
-
-mock.publish: local.check ## Builds and mocks app release
-	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser release --skip-publish --rm-dist
-
 dockerise: local.check ## Containerise the appliction
 	docker build . --tag ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
 
 docker.lint: ## Linting Dockerfile for
 	if [ -z "${DEV}" ]; then hadolint Dockerfile ; else docker run --rm -v $(APP_DIR):/app -w /app hadolint/hadolint:latest-alpine hadolint Dockerfile ; fi
-
-docker.login: ## Establishes the connection to the docker registry
-	docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWD} ${DOCKER_REPO}
-
-docker.publish.image: docker_login ## Publisies the image to the registered docker registry.
-	docker push ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
 
 lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
 	if [ -z "${DEV}" ]; then golangci-lint run --color always ; else docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.31-alpine golangci-lint run --color always ; fi
@@ -68,13 +56,23 @@ report: ## Publishes the go-report of the appliction (uses go-reportcard)
 dev.prerequisite.up: ## Sets up the development environment with all necessary components.
 	$(APP_DIR)/scripts/prerequisite.sh
 
-dev.prerequisite.purge: ## Teardown the development environment by removing all components.
-
 install.hooks: ## install pre-push hooks for the repository.
 	${APP_DIR}/scripts/hook.sh ${APP_DIR}
 
 generate.mock: ## generates mocks for the selected source packages.
 	@go generate ${SRC_PACKAGES}
 
+publish: local.check ## Builds and publishes the app
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser release --rm-dist
+
+mock.publish: local.check ## Builds and mocks app release
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser release --skip-publish --rm-dist
+
 test: ## runs test cases
 	go test ./... -mod=vendor -coverprofile cover.out
+
+generate.document: ## generates cli documents using 'github.com/spf13/cobra/doc'.
+	@go generate github.com/nikhilsbhat/terragen/cli_docs
+
+docker.login: ## Should login to ghcr docker registry.
+	@echo "${GITHUB_TOKEN}" | docker login ghcr.io -u nikshilsbhat --password-stdin
