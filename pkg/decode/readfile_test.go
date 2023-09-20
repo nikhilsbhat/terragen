@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/nikhilsbhat/terragen/pkg/decode"
-
 	"github.com/stretchr/testify/assert"
 )
 

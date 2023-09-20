@@ -5,13 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
-
-	"github.com/nikhilsbhat/neuron/cli/ui"
 )
 
 func terragenFileCreate(path string) error {
@@ -36,34 +33,33 @@ func (i *Input) setupTerragen() error {
 	goInit := exec.Command("go", "mod", "init", i.mod) //nolint:gosec
 	goInit.Dir = i.Path
 	if err := goInit.Run(); err != nil {
-		return err
+		return fmt.Errorf("running 'go mod init' errored with %w", err)
 	}
 
 	goFmt := exec.Command("goimports", "-w", i.Path) //nolint:gosec
 	goFmt.Dir = i.Path
 	if err := goFmt.Run(); err != nil {
-		return err
+		return fmt.Errorf("running 'goimports -w' errored with %w", err)
 	}
 
 	goTidy := exec.Command("go", "mod", "tidy")
 	goTidy.Dir = i.Path
 	if err := goTidy.Run(); err != nil {
-		log.Println(ui.Error(err.Error()))
-
-		return err
+		return fmt.Errorf("running 'go mod tidy' errored with %w", err)
 	}
 
 	goVnd := exec.Command("go", "mod", "vendor")
 	goVnd.Dir = i.Path
 	if err := goVnd.Run(); err != nil {
-		return err
+		return fmt.Errorf("running 'go mod vendor' errored with %w", err)
 	}
 
 	return nil
 }
 
 func (i *Input) genTerraDir() error {
-	err := os.MkdirAll(filepath.Join(i.Path, i.Provider), scaffoldDirPerm)
+	terraPath := filepath.Join(i.Path, "internal")
+	err := os.MkdirAll(terraPath, scaffoldDirPerm)
 	if err != nil {
 		return err
 	}
@@ -93,7 +89,7 @@ func (i *Input) getPath() string {
 	if i.Path == "." {
 		dir, err := os.Getwd()
 		if err != nil {
-			fmt.Println(ui.Error(err.Error()))
+			i.logger.Fatal(err.Error())
 			os.Exit(1)
 		}
 
@@ -101,7 +97,7 @@ func (i *Input) getPath() string {
 	}
 	path, err := filepath.Abs(i.Path)
 	if err != nil {
-		fmt.Println(ui.Error(err.Error()))
+		i.logger.Fatal(err.Error())
 		os.Exit(1)
 	}
 
@@ -118,47 +114,47 @@ func renderTemplate(templateName, temp string, data interface{}) ([]byte, error)
 	return templateWriter.Bytes(), nil
 }
 
-func validatePrerequisite() bool {
+func (i *Input) validatePrerequisite() bool {
 	success := true
 	if goPath := exec.Command("go"); goPath.Err != nil {
 		if !errors.Is(goPath.Err, exec.ErrDot) {
-			log.Println(ui.Info(goPath.Err.Error()))
-			log.Println(ui.Info("terragen requires go to generate scaffolds"))
+			i.logger.Error(goPath.Err.Error())
+			i.logger.Error("terragen requires go to generate scaffolds")
 			success = false
 		}
 	}
 
 	if importsPath := exec.Command("goimports"); importsPath.Err != nil {
 		if !errors.Is(importsPath.Err, exec.ErrDot) {
-			log.Println(ui.Info(importsPath.Err.Error()))
-			log.Println(ui.Info("install goimports: go install goimports"))
+			i.logger.Error(importsPath.Err.Error())
+			i.logger.Error("install goimports: go install goimports")
 			success = false
 		}
 	}
 
 	if fumptCmd := exec.Command("gofumpt"); fumptCmd.Err != nil {
 		if !errors.Is(fumptCmd.Err, exec.ErrDot) {
-			log.Println(ui.Error(fumptCmd.Err.Error()))
-			log.Println(ui.Error("install gofumpt: go install gofumpt"))
+			i.logger.Error(fumptCmd.Err.Error())
+			i.logger.Error("install gofumpt: go install gofumpt")
 			success = false
 		}
 	}
 
 	if fmtCmd := exec.Command("gofmt"); fmtCmd.Err != nil {
 		if !errors.Is(fmtCmd.Err, exec.ErrDot) {
-			log.Println(ui.Info(fmtCmd.Err.Error()))
-			log.Println(ui.Info("install gofmt: go install gofmt"))
+			i.logger.Error(fmtCmd.Err.Error())
+			i.logger.Error("install gofmt: go install gofmt")
 			success = false
 		}
 	}
 
 	if success {
-		log.Println(ui.Info("scaffolds would be generated with following golang version"))
+		i.logger.Info("scaffolds would be generated with following golang version")
 		out, err := exec.Command("go", "version").Output()
 		if err != nil {
-			log.Println(ui.Error(err.Error()))
+			i.logger.Error(err.Error())
 		}
-		log.Print(ui.Info(string(bytes.TrimRight(out, "\n"))))
+		i.logger.Info(string(bytes.TrimRight(out, "\n")))
 
 		return success
 	}

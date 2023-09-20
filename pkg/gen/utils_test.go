@@ -25,9 +25,6 @@ func TestInput_enrichNames(t *testing.T) {
 	assert.Equal(t, expected, input)
 }
 
-func TestInput_getUpdatedResourceNDataSources(t *testing.T) {
-}
-
 func TestInput_setMod(t *testing.T) {
 	input := Input{
 		RepoGroup: "github.com/nikhilsbhat",

@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/nikhilsbhat/terragen/pkg/utils"
-
 	"github.com/stretchr/testify/assert"
 )
 

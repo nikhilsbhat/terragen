@@ -24,9 +24,10 @@ help: ## Prints help (only for targets with comments)
 	@grep -E '^[a-zA-Z0-9._-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 local.fmt: ## Lints all the go code in the application.
-	gofmt -w $(GOFMT_FILES)
+	@gofmt -w $(GOFMT_FILES)
 	$(GOBIN)/goimports -w $(GOFMT_FILES)
 	$(GOBIN)/gofumpt -l -w $(GOFMT_FILES)
+	$(GOBIN)/gci write $(GOFMT_FILES) --skip-generated
 
 local.check: local.fmt ## Loads all the dependencies to vendor directory
 	go mod vendor

@@ -4,11 +4,10 @@ import (
 	// git template has to be sourced from template.
 	_ "embed"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/nikhilsbhat/neuron/cli/ui"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/src-d/go-git.v4"
 )
 
@@ -20,6 +19,7 @@ type Git struct {
 	Provider  string
 	Path      string
 	GitIgnore string
+	logger    *logrus.Logger
 }
 
 // Create scaffolds Git as per the requirements.
@@ -31,8 +31,8 @@ func (g *Git) Create() error {
 	}
 
 	if g.DryRun {
-		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terrgenGitIgnore, g.Path)))
-		log.Println(ui.Info("contents of gitignore looks like"))
+		g.logger.Infof("%s would be created under %s", terrgenGitIgnore, g.Path)
+		g.logger.Infof("contents of gitignore looks like")
 		printData(gitIgnoreData)
 
 		return nil
@@ -64,6 +64,7 @@ func (g *Git) Update() error {
 	return nil
 }
 
+//nolint:revive
 func (g *Git) Get(currentContent []byte) ([]byte, error) {
 	return nil, nil
 }
@@ -74,5 +75,6 @@ func NewGit(i *Input) *Git {
 		Provider:  i.Provider,
 		Path:      i.Path,
 		GitIgnore: i.TemplateRaw.GitIgnore,
+		logger:    i.logger,
 	}
 }

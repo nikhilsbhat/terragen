@@ -25,7 +25,7 @@ func (i *Input) setMod() string {
 		i.RepoGroup = i.Provider
 	}
 
-	return fmt.Sprintf("%s/terraform-provider-%s", i.RepoGroup, i.Provider)
+	return fmt.Sprintf("%s/%s", i.RepoGroup, i.Provider)
 }
 
 func (i *Input) enrichNames() {
@@ -43,6 +43,7 @@ func (i *Input) enrichNames() {
 		}
 		i.DataSource = datasource
 	}
+	//nolint:revive
 	if len(i.Importer) != 0 { //nolint:staticcheck
 		// to be implemented once we hit on importers.
 	}

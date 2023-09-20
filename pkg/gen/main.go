@@ -4,11 +4,10 @@ import (
 	// main.go template has to be sourced from template.
 	_ "embed"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/nikhilsbhat/neuron/cli/ui"
+	"github.com/sirupsen/logrus"
 )
 
 //go:embed templates/main.tmpl
@@ -21,6 +20,7 @@ type Main struct {
 	Provider       string
 	AutoGenMessage string
 	Dependents     []string
+	logger         *logrus.Logger
 }
 
 func (m *Main) Create() error {
@@ -31,8 +31,8 @@ func (m *Main) Create() error {
 	}
 
 	if m.DryRun {
-		log.Print(ui.Info(fmt.Sprintf("%s would be created under %s", terragenMain, m.Path)))
-		log.Println(ui.Info("contents of main.go looks like"))
+		m.logger.Infof("%s would be created under %s", terragenMain, m.Path)
+		m.logger.Infof("contents of main.go looks like")
 		printData(mainData)
 
 		return nil
@@ -59,6 +59,7 @@ func (m *Main) Update() error {
 	return nil
 }
 
+//nolint:revive
 func (m *Main) Get(currentContent []byte) ([]byte, error) {
 	return nil, nil
 }
@@ -71,5 +72,6 @@ func NewMain(i *Input) *Main {
 		Provider:       i.Provider,
 		AutoGenMessage: i.AutoGenMessage,
 		Dependents:     i.Dependents,
+		logger:         i.logger,
 	}
 }

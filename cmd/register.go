@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nikhilsbhat/neuron/cli/ui"
-	gen "github.com/nikhilsbhat/terragen/pkg/gen"
+	"github.com/nikhilsbhat/terragen/pkg/gen"
 	"github.com/nikhilsbhat/terragen/version"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +13,7 @@ import (
 var (
 	createCommands map[string]*cobra.Command
 	editCommands   map[string]*cobra.Command
-	genin          gen.Input
+	generateInput  gen.Input
 )
 
 type terragenCommands struct {
@@ -48,11 +47,11 @@ func (c *terragenCommands) prepareCommands() *cobra.Command {
 
 func getRootCommand() *cobra.Command {
 	rootCommand := &cobra.Command{
-		Use:   "terragen [command]",
-		Short: "Utility that helps in generating scaffolds for terraform provider",
-		Long:  `Terragen helps user to create custom terraform provider and its components by generating scaffolds.`,
-		Args:  cobra.MinimumNArgs(1),
-		RunE:  cm.echoTerragen,
+		Use:     "terragen [command]",
+		Short:   "Utility that helps in generating scaffolds for terraform provider",
+		Long:    `Terragen helps user to create custom terraform provider and its components by generating scaffolds.`,
+		PreRunE: setCLI,
+		RunE:    echoTerragen,
 	}
 	rootCommand.SetUsageTemplate(getUsageTemplate())
 
@@ -61,11 +60,11 @@ func getRootCommand() *cobra.Command {
 
 func getCreateCommand() *cobra.Command {
 	createCommand := &cobra.Command{
-		Use:          "create [command] [flags]",
-		Short:        "Command to scaffold provider and other components of terraform provider",
-		Long:         `This will help user to generate the initial components of terraform provider.`,
-		SilenceUsage: true,
-		RunE:         cm.echoTerragen,
+		Use:     "create [command] [flags]",
+		Short:   "Command to scaffold provider and other components of terraform provider",
+		Long:    `This will help user to generate the initial components of terraform provider.`,
+		PreRunE: setCLI,
+		RunE:    echoTerragen,
 	}
 	registerFlags("create", createCommand)
 	for _, command := range createCommands {
@@ -77,14 +76,15 @@ func getCreateCommand() *cobra.Command {
 
 func getEditCommand() *cobra.Command {
 	editCommand := &cobra.Command{
-		Use:          "edit [command] [flags]",
-		Short:        "Command to edit the scaffold created for a provider",
-		Long:         `This will help user to edit the scaffolds generated for terraform provider and other components of them.`,
-		SilenceUsage: true,
-		RunE:         cm.echoTerragen,
+		Use:     "edit [command] [flags]",
+		Short:   "Command to edit the scaffold created for a provider",
+		Long:    `This will help user to edit the scaffolds generated for terraform provider and other components of them.`,
+		PreRunE: setCLI,
+		RunE:    echoTerragen,
 	}
 	registerFlags("edit", editCommand)
 	for _, command := range editCommands {
+		command.SilenceUsage = true
 		editCommand.AddCommand(command)
 	}
 
@@ -100,21 +100,23 @@ func getVersionCommand() *cobra.Command {
 	}
 }
 
-func (cm *cliMeta) echoTerragen(cmd *cobra.Command, args []string) error {
-	if err := cmd.Usage(); err != nil {
-		return err
-	}
+func echoTerragen(cmd *cobra.Command, _ []string) error {
+	return cmd.Usage()
+}
+
+func setCLI(_ *cobra.Command, _ []string) error {
+	InitLogger(cliLogLevel)
 
 	return nil
 }
 
-func versionConfig(cmd *cobra.Command, args []string) error {
+func versionConfig(_ *cobra.Command, _ []string) error {
 	buildInfo, err := json.Marshal(version.GetBuildInfo())
 	if err != nil {
-		fmt.Println(ui.Error(err.Error()))
+		cliLogger.Errorf("fetching version information of terragen errored with: %s", err.Error())
 		os.Exit(1)
 	}
-	fmt.Println("terragen version:", string(buildInfo))
+	fmt.Printf("terragen version: %s\n", string(buildInfo))
 
 	return nil
 }

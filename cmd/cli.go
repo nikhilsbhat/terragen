@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -17,8 +18,7 @@ func init() {
 // Main will take the workload of executing/starting the cli, when the command is passed to it.
 func Main() {
 	if err := Execute(os.Args[1:]); err != nil {
-		cm.NeuronSaysItsError(err.Error())
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
 

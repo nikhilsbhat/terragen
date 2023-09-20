@@ -4,11 +4,10 @@ import (
 	// makefile template has to be sourced from template.
 	_ "embed"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/nikhilsbhat/neuron/cli/ui"
+	"github.com/sirupsen/logrus"
 )
 
 //go:embed templates/makefile.tmpl
@@ -18,6 +17,7 @@ type Make struct {
 	DryRun   bool
 	Path     string
 	Provider string
+	logger   *logrus.Logger
 }
 
 func (m *Make) Create() error {
@@ -28,8 +28,8 @@ func (m *Make) Create() error {
 	}
 
 	if m.DryRun {
-		log.Print(ui.Info(fmt.Sprintf("Makefile would be created under %s", m.Path)))
-		log.Println(ui.Info("contents of Makefile source looks like"))
+		m.logger.Infof("Makefile would be created under %s", m.Path)
+		m.logger.Infof("contents of Makefile source looks like")
 		printData(makeFileData)
 
 		return nil
@@ -56,6 +56,7 @@ func (m *Make) Update() error {
 	return nil
 }
 
+//nolint:revive
 func (m *Make) Get(currentContent []byte) ([]byte, error) {
 	return nil, nil
 }
@@ -65,5 +66,6 @@ func NewMake(i *Input) *Make {
 		DryRun:   i.DryRun,
 		Provider: i.Provider,
 		Path:     i.Path,
+		logger:   i.logger,
 	}
 }

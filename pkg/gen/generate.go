@@ -4,8 +4,10 @@ package gen
 import (
 	"fmt"
 	"log"
+	"path/filepath"
+	"strings"
 
-	"github.com/nikhilsbhat/neuron/cli/ui"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +41,9 @@ type Input struct {
 	// DatasourceRequired determines if data_source to be created while generating scaffolds.
 	// Enabling this wth no data_source name is not accepted.
 	DatasourceRequired bool
+	// SkipProviderUpdate when set, would skip updating the provider after generating the `data-sources` or `resources`.
+	// When it is enabled, updating the provider with newer `data-sources` or `resources` has to be done manually.
+	SkipProviderUpdate bool
 	// ImporterRequired determines if importer to be created while generating scaffolds.
 	// Enabling this wth no importer name is not accepted.
 	ImporterRequired bool
@@ -69,10 +74,13 @@ type Input struct {
 	// List of all the dependent packages for terraform, if not passed it picks default.
 	Dependents []string
 	// TemplateRaw consists of go-templates which are the core for terragen.
-	TemplateRaw  TerraTemplate
+	TemplateRaw TerraTemplate
+	// RepoGroup to which the Terraform provider is to be part. This would be used as base name to set `go.mod`
+	// ex: github.com/nikshilsbhat
 	RepoGroup    string
 	mod          string
 	metaDataPath string
+	logger       *logrus.Logger
 }
 
 // TerraTemplate are the collections of go-templates which are used to generate terraform provider's base template.
@@ -107,88 +115,96 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
-func (i *Input) Generate(cmd *cobra.Command, args []string) {
+func (i *Input) Generate(providerName string) error {
 	i.setInputs()
-	i.Provider = args[0]
+	i.Provider = strings.ReplaceAll(providerName, "-", "_")
+	i.Path = filepath.Join(i.getPath(), i.Provider)
 	i.mod = i.setMod()
 
 	if i.TerraformPluginFramework {
-		log.Println(ui.Info("plugin-framework is enabled, " +
-			"scaffold would be generated using https://github.com/hashicorp/terraform-provider-scaffolding-framework"))
+		return fmt.Errorf("plugin-framework is enabled, " +
+			"scaffold would be generated as per https://github.com/hashicorp/terraform-provider-scaffolding-framework")
 	}
 
 	if !i.SkipValidation {
-		if !validatePrerequisite() {
-			log.Fatal(ui.Error("system validate failed, please install prerequisites to scaffold terraform provider"))
+		if !i.validatePrerequisite() {
+			i.logger.Error("system validate failed, please install prerequisites to scaffold terraform provider")
 		}
 	}
 
 	if i.Dependents == nil {
-		i.Dependents = []string{fmt.Sprintf("%s/%s", i.mod, i.Provider), "github.com/hashicorp/terraform-plugin-sdk/v2/plugin"}
+		i.Dependents = []string{filepath.Join(i.mod, "internal"), "github.com/hashicorp/terraform-plugin-sdk/v2/plugin"}
 	}
 
-	log.Println(ui.Info(fmt.Sprintf("go module for scaffold would be: %s", i.mod)))
+	i.logger.Infof("dependent packages would be: %v", i.Dependents)
+	i.logger.Infof("go module for scaffold would be: %s", i.mod)
+
 	if NewProvider(i).Scaffolded() {
-		log.Fatal(ui.Error(fmt.Sprintf("scaffolds for provider '%s' was already generated\n\t use"+
-			" `terragen create -h` or `terragen edit -h` for more info", i.Provider)))
+		return fmt.Errorf("scaffolds for provider '%s' was already generated use "+
+			"`terragen create -h` or `terragen edit -h` for more info", i.Provider)
 	}
 
-	log.Println(ui.Info(fmt.Sprintf("scaffolds for provider '%s' would be generated under: '%s'", i.Provider, i.Path)))
+	i.logger.Infof("scaffolds for provider '%s' would be generated under: '%s'", i.Provider, i.Path)
 
-	log.Println(ui.Info("terragen is in the process of making life simpler"))
+	i.logger.Infof("terragen is in the process of making life simpler")
 
 	if !i.DryRun {
 		if err := i.genTerraDir(); err != nil {
-			log.Fatal(ui.Error(fmt.Sprintf("generating directories for scaffolds under %s failed with error: %v", i.Provider, err)))
+			return fmt.Errorf("generating directories for scaffolds under %s failed with error: %w", i.Provider, err)
 		}
 	}
 
 	if err := NewProvider(i).Create(); err != nil {
-		log.Fatal(ui.Error(err.Error()))
+		return fmt.Errorf("creating scaffolds for terraform provider errored with '%s'", err.Error())
 	}
 
 	if err := NewMain(i).Create(); err != nil {
-		log.Fatal(ui.Error(fmt.Sprintf("oops generating main.go scaffolds for provider %s failed with error: %v", i.Provider, err)))
+		return fmt.Errorf("oops generating scaffold main.go for provider %s failed with error: %w", i.Provider, err)
 	}
 
 	if i.ResourceRequired {
 		if err := NewResource(i).Create(); err != nil {
-			log.Fatal(ui.Error(err.Error()))
+			return fmt.Errorf("creating scaffolds for terraform resource errored with '%s'", err.Error())
 		}
 	}
 
 	if i.DatasourceRequired {
 		if err := NewDataSource(i).Create(); err != nil {
-			log.Fatal(ui.Error(err.Error()))
+			return fmt.Errorf("creating scaffolds for terraform data source errored with '%s'", err.Error())
 		}
 	}
 
 	if err := NewMake(i).Create(); err != nil {
-		log.Fatal(ui.Error(err.Error()))
+		return fmt.Errorf("creating scaffolds makefile errored with '%s'", err.Error())
 	}
 
 	if err := NewGit(i).Create(); err != nil {
-		log.Fatalf(ui.Error(err.Error()))
+		return fmt.Errorf("creating scaffolds for 'gitignore' errored with '%s'", err.Error())
 	}
 
 	if !i.DryRun {
 		if err := i.setupTerragen(); err != nil {
-			log.Fatal(ui.Error(err.Error()))
+			return fmt.Errorf("setting up scaffolds post scaffold generation errored with '%s'", err.Error())
 		}
 	}
 
 	if err := i.CreateOrUpdateMetadata(); err != nil {
-		log.Fatalf(ui.Error(fmt.Sprintf("oops creating/updating metadata errored out with %v", err)))
+		return fmt.Errorf("oops creating/updating metadata errored out with %s", err.Error())
 	}
 
-	log.Println(ui.Info("life is less complicated now ...!!"))
-	log.Println(ui.Info(fmt.Sprintf("start enhancing terraform provider %s from the scaffold generated by terragen", i.Provider)))
+	i.logger.Infof("life is less complicated now ...!!")
+	i.logger.Infof("start enhancing terraform provider '%s' from the scaffold generated by terragen", i.Provider)
+
+	return nil
 }
 
 func (i *Input) setInputs() {
 	i.setRequires()
 	i.getTemplate()
 	i.enrichNames()
-	i.Path = i.getPath()
 	i.AutoGenMessage = autoGenMessage
+}
+
+func (i *Input) SetLogger(logger *logrus.Logger) {
+	i.logger = logger
 }

@@ -4,14 +4,12 @@ import (
 	// provider template has to be sourced from template.
 	_ "embed"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/jinzhu/copier"
 	"github.com/sergi/go-diff/diffmatchpatch"
-
-	"github.com/nikhilsbhat/neuron/cli/ui"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -32,18 +30,19 @@ type Provider struct {
 	Resource       []string
 	DataSource     []string
 	Importer       []string
+	logger         *logrus.Logger
 }
 
 func (p *Provider) Create() error {
-	provideFile := filepath.Join(p.Path, p.Provider, terragenProvider)
+	provideFile := filepath.Join(p.Path, "internal", terragenProvider)
 	providerData, err := renderTemplate(terragenProvider, p.ProviderTemp, p)
 	if err != nil {
-		log.Fatalf(ui.Error(fmt.Sprintf("oops rendering provider %s errored with: %v ", p.Provider, err)))
+		p.logger.Fatalf("oops rendering provider %s errored with: %v ", p.Provider, err)
 	}
 
 	if p.DryRun {
-		log.Println(ui.Info(fmt.Sprintf("provider '%s' would be created under '%s'", p.Provider, p.Path)))
-		log.Println(ui.Info("contents of provider looks like"))
+		p.logger.Infof("provider '%s' would be created under '%s'", p.Provider, p.Path)
+		p.logger.Infof("contents of provider looks like")
 		printData(providerData)
 
 		return nil
@@ -56,8 +55,10 @@ func (p *Provider) Create() error {
 }
 
 func (p *Provider) Update() error {
-	currentProvider, err := os.ReadFile(filepath.Join(p.Path, p.Provider, terragenProvider))
+	currentProvider, err := os.ReadFile(filepath.Join(p.Path, "internal", terragenProvider))
 	if err != nil {
+		p.logger.Errorf("reading existing provider errored with '%s'", err.Error())
+
 		return err
 	}
 
@@ -67,17 +68,21 @@ func (p *Provider) Update() error {
 	}
 
 	if err = newIn.GetUpdated(); err != nil {
+		p.logger.Errorf("fetching updated provider config errored with '%s'", err.Error())
+
 		return err
 	}
 
 	updateData, err := newIn.Get(currentProvider)
 	if err != nil {
+		p.logger.Errorf("getting updated provider config errored with '%s'", err.Error())
+
 		return err
 	}
 
-	providerFile := filepath.Join(newIn.Path, newIn.Provider, terragenProvider)
+	providerFile := filepath.Join(newIn.Path, "internal", terragenProvider)
 	if err = os.WriteFile(providerFile, updateData, scaffoldPerm); err != nil {
-		return err
+		return fmt.Errorf("writing update provider config errored with '%s'", err.Error())
 	}
 
 	return nil
@@ -107,12 +112,15 @@ func (p *Provider) GetUpdated() error {
 }
 
 func (p *Provider) Scaffolded() bool {
-	if _, dirErr := os.Stat(filepath.Join(p.Path, terragenMetadata)); os.IsNotExist(dirErr) {
+	metadatataPath := filepath.Join(p.Path, terragenMetadata)
+	if _, dirErr := os.Stat(metadatataPath); os.IsNotExist(dirErr) {
+		p.logger.Errorf("unable to find the terragen.yml from '%s'", metadatataPath)
+
 		return false
 	}
 	metadata, err := getCurrentMetadata(filepath.Join(p.Path, terragenMetadata))
 	if err != nil {
-		log.Println(ui.Error(err.Error()))
+		p.logger.Error(err.Error())
 
 		return true
 	}
@@ -129,5 +137,6 @@ func NewProvider(i *Input) *Provider {
 		ProviderTemp: i.TemplateRaw.ProviderTemp,
 		Resource:     i.Resource,
 		DataSource:   i.DataSource,
+		logger:       i.logger,
 	}
 }

@@ -20,6 +20,9 @@ linters:
     - nonamedreturns
     - gochecknoinits
     - nosnakecase
+    - depguard
+    - tagalign
+    - goerr113
 
 issues:
   exclude-rules:
@@ -34,6 +37,7 @@ issues:
 
 linters-settings:
   funlen:
+    statements: 60
     lines: 100
 
   lll:
