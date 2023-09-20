@@ -9,45 +9,47 @@ GOVERSION?=$(shell go version | awk '{printf $$3}')
 
 .PHONY: help
 help: ## Prints help (only for targets with comments)
-@grep -E '^[a-zA-Z0-9._-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; \
-{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9._-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 local.fmt: ## Lints all the go code in the application.
-    @gofmt -w $(GOFMT_FILES)
-    $(GOBIN)/goimports -w $(GOFMT_FILES)
-    $(GOBIN)/gofumpt -l -w $(GOFMT_FILES)
-    $(GOBIN)/gci write $(GOFMT_FILES) --skip-generated
+	@gofmt -w $(GOFMT_FILES)
+	$(GOBIN)/goimports -w $(GOFMT_FILES)
+	$(GOBIN)/gofumpt -l -w $(GOFMT_FILES)
+	$(GOBIN)/gci write $(GOFMT_FILES) --skip-generated
 
 local.check: local.fmt ## Loads all the dependencies to vendor directory
-    go mod vendor
-    go mod tidy
+	go mod vendor
+	go mod tidy
 
 local.build: local.check ## Generates the artifact with the help of 'go build'
-    go build -o $(APP_NAME)_$(VERSION) -ldflags="-s -w"
+	go build -o $(APP_NAME)_$(VERSION) -ldflags="-s -w"
 
 publish: local.check ## Builds and publishes the app
-    GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} PLUGIN_PATH=${APP_DIR} goreleaser release --rm-dist
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} PLUGIN_PATH=${APP_DIR} goreleaser release --rm-dist
 
 mock.publish: local.check ## Builds and mocks app release
-    GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} PLUGIN_PATH=${APP_DIR} goreleaser release --skip-publish --rm-dist
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} PLUGIN_PATH=${APP_DIR} goreleaser release --skip-publish --rm-dist
+
+docker.lint: ## Linting Dockerfile for
+	if [ -z "${DEV}" ]; then hadolint Dockerfile ; else docker run --rm -v $(APP_DIR):/app -w /app hadolint/hadolint:latest-alpine hadolint Dockerfile ; fi
 
 lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
-    docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.31-alpine golangci-lint run --color always
+	if [ -z "${DEV}" ]; then golangci-lint run --color always ; else docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.31-alpine golangci-lint run --color always ; fi
 
 tflint:
-    @terraform fmt -write=false -check=true -diff=true examples/
+	@terraform fmt -write=false -check=true -diff=true examples/
 
 test: ## runs test cases
-    @go test ./... -mod=vendor -coverprofile cover.out && go tool cover -html=cover.out -o cover.html && open cover.html
+	@go test ./... -mod=vendor -coverprofile cover.out && go tool cover -html=cover.out -o cover.html && open cover.html
 
 report: ## Publishes the go-report of the appliction (uses go-reportcard)
-    docker run --rm -v $(APP_DIR):/app -w /app basnik/goreportcard-cli:latest goreportcard-cli -v
+	docker run --rm -v $(APP_DIR):/app -w /app basnik/goreportcard-cli:latest goreportcard-cli -v
 
 dev.prerequisite.up: ## Sets up the development environment with all necessary components.
-    $(APP_DIR)/scripts/prerequisite.sh
+	$(APP_DIR)/scripts/prerequisite.sh
 
 generate.mock: ## generates mocks for the selected source packages.
-    @go generate ${SRC_PACKAGES}
+	@go generate ${SRC_PACKAGES}
 
 generate.document:
-    tfplugindocs generate --website-source-dir templates/ --website-temp-dir templates-latest --examples-dir examples
+	tfplugindocs generate --website-source-dir templates/ --website-temp-dir templates-latest --examples-dir examples
