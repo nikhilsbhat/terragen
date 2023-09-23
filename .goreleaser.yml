@@ -4,16 +4,31 @@ before:
   hooks:
     # You may remove this if you don't use go modules.
     - go mod tidy
-    # you may remove this if you don't need go generate
-    - go generate ./...
+
 builds:
   - env:
       - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w 
+        -X github.com/nikhilsbhat/terragen/version.Version={{.Version}}
+        -X github.com/nikhilsbhat/terragen/version.Env={{.Env.BUILD_ENVIRONMENT}}
+        -X github.com/nikhilsbhat/terragen/version.BuildDate={{.Date}}
+        -X github.com/nikhilsbhat/terragen/version.Revision={{.Commit}}
+        -X github.com/nikhilsbhat/terragen/version.GoVersion={{.Env.GOVERSION}}
+        -X github.com/nikhilsbhat/terragen/version.Platform={{ .Os }}/{{ .Arch }}
     goos:
+      - freebsd
+      - windows
       - linux
       - darwin
-    ldflags:
-      - -s -w -X github.com/nikhilsbhat/terragen/version.Version={{.Version}} -X github.com/nikhilsbhat/terragen/version.Env={{.Env.BUILD_ENVIRONMENT}} -X github.com/nikhilsbhat/terragen/version.BuildDate={{.Date}} -X github.com/nikhilsbhat/terragen/version.Revision={{.Commit}} -X github.com/nikhilsbhat/terragen/version.GoVersion={{.Env.GOVERSION}} -X github.com/nikhilsbhat/terragen/version.Platform={{ .Os }}/{{ .Arch }}
+    goarch:
+      - amd64
+      - '386'
+      - arm
+      - arm64
+    binary: '{{ .ProjectName }}'
 
 dockers:
   - goos: linux
@@ -22,21 +37,37 @@ dockers:
       - terragen
     skip_push: false
     image_templates:
-      - "basnik/terragen:latest"
-      - "basnik/terragen:{{ .Tag }}"
-      - "basnik/terragen:{{ .Tag }}-{{ .Env.GOVERSION }}"
+      - "ghcr.io/nikhilsbhat/terragen:latest"
+      - "ghcr.io/nikhilsbhat/terragen:{{ .Tag }}"
+      - "ghcr.io/nikhilsbhat/terragen:{{ .Tag }}-{{ .Env.GOVERSION }}"
     dockerfile: Dockerfile
 
 archives:
-  - replacements:
+  - format: 'tar.gz'
+    replacements:
       darwin: Darwin
       linux: Linux
       386: i386
       amd64: x86_64
+      name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+
 checksum:
-  name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}"
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+
+signs:
+  - artifacts: checksum
+    args:
+      # if you are using this in a GitHub action or some other automated pipeline, you
+      # need to pass the batch flag to indicate its not interactive.
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}" # set this environment variable for your signing key
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+
 changelog:
   sort: asc
   filters:

@@ -127,7 +127,7 @@ func (i *Input) validatePrerequisite() bool {
 	if importsPath := exec.Command("goimports"); importsPath.Err != nil {
 		if !errors.Is(importsPath.Err, exec.ErrDot) {
 			i.logger.Error(importsPath.Err.Error())
-			i.logger.Error("install goimports: go install goimports")
+			i.logger.Error("install goimports: go install golang.org/x/tools/cmd/goimports@latest")
 			success = false
 		}
 	}
@@ -135,7 +135,7 @@ func (i *Input) validatePrerequisite() bool {
 	if fumptCmd := exec.Command("gofumpt"); fumptCmd.Err != nil {
 		if !errors.Is(fumptCmd.Err, exec.ErrDot) {
 			i.logger.Error(fumptCmd.Err.Error())
-			i.logger.Error("install gofumpt: go install gofumpt")
+			i.logger.Error("install gofumpt: go install mvdan.cc/gofumpt@latest")
 			success = false
 		}
 	}
@@ -148,10 +148,18 @@ func (i *Input) validatePrerequisite() bool {
 		}
 	}
 
+	if fmtCmd := exec.Command("gci"); fmtCmd.Err != nil {
+		if !errors.Is(fmtCmd.Err, exec.ErrDot) {
+			i.logger.Error(fmtCmd.Err.Error())
+			i.logger.Error("install gci: go install github.com/daixiang0/gci@latest")
+			success = false
+		}
+	}
+
 	if tfPluginDocsCmd := exec.Command("tfplugindocs"); tfPluginDocsCmd.Err != nil {
 		if !errors.Is(tfPluginDocsCmd.Err, exec.ErrDot) {
 			i.logger.Error(tfPluginDocsCmd.Err.Error())
-			i.logger.Error("install tfplugindocs: https://github.com/hashicorp/terraform-plugin-docs")
+			i.logger.Error("install tfplugindocs: go install github.com/hashicorp/terraform-plugin-docs@latest")
 			success = false
 		}
 	}

@@ -45,7 +45,7 @@ dockerise: local.check ## Containerise the appliction
 	docker build . --tag ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
 
 docker.lint: ## Linting Dockerfile for
-	if [ -z "${DEV}" ]; then hadolint Dockerfile ; else docker run --rm -v $(APP_DIR):/app -w /app hadolint/hadolint:latest-alpine hadolint Dockerfile ; fi
+	docker run --rm -v $(APP_DIR):/app -w /app hadolint/hadolint:latest-alpine hadolint Dockerfile
 
 lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
 	if [ -z "${DEV}" ]; then golangci-lint run --color always ; else docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.31-alpine golangci-lint run --color always ; fi
