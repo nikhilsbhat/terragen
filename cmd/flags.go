@@ -25,13 +25,12 @@ func registerFlags(command string, cmd *cobra.Command) {
 	case "provider":
 		cmd.PersistentFlags().StringSliceVarP(&generateInput.DataSource, "data-source", "d", nil, "name of the data scaffold")
 		cmd.PersistentFlags().StringSliceVarP(&generateInput.Resource, "resource", "r", nil, "name of the resource scaffold")
-		cmd.PersistentFlags().StringVarP(&generateInput.Importer, "importer", "i", "", "name of the importer scaffold")
 		cmd.PersistentFlags().StringVarP(&generateInput.RepoGroup, "repo-group", "g", "",
 			"repo group to which the terraform provider to be part of")
 		cmd.PersistentFlags().BoolVarP(&generateInput.ResourceRequired, "resource-required", "", false,
 			"enable if resource requires scaffold")
 		cmd.PersistentFlags().BoolVarP(&generateInput.ImporterRequired, "importer-required", "", false,
-			"enable if importer requires scaffold")
+			"if enabled importer for a resource would be scaffolded")
 		cmd.PersistentFlags().BoolVarP(&generateInput.DatasourceRequired, "datasource-required", "", false,
 			"enable if data_source requires scaffold")
 		cmd.PersistentFlags().BoolVarP(&generateInput.SkipValidation, "skip-validation", "",
@@ -39,5 +38,7 @@ func registerFlags(command string, cmd *cobra.Command) {
 	case "datasource", "resource":
 		cmd.PersistentFlags().StringVarP(&generateInput.Provider, "provider", "", "demo",
 			"name of the provider for which resource/datasource to be scaffolded")
+		cmd.PersistentFlags().BoolVarP(&generateInput.ImporterRequired, "importer-required", "", false,
+			"if enabled importer for a resource would be scaffolded")
 	}
 }

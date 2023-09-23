@@ -24,6 +24,7 @@ type Resource struct {
 	DryRun             bool
 	Force              bool
 	SkipProviderUpdate bool
+	Importer           bool
 	AutoGenMessage     string
 	Provider           string
 	ResourceTemp       string
@@ -170,6 +171,7 @@ func NewResource(i *Input) *Resource {
 		Path:               i.Path,
 		DryRun:             i.DryRun,
 		Force:              i.Force,
+		Importer:           i.ImporterRequired,
 		AutoGenMessage:     i.AutoGenMessage,
 		Provider:           i.Provider,
 		ResourceTemp:       i.TemplateRaw.ResourceTemp,

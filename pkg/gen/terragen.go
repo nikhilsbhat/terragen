@@ -24,9 +24,6 @@ func (i *Input) setRequires() {
 	if len(i.DataSource) != 0 {
 		i.DatasourceRequired = true
 	}
-	if len(i.Importer) != 0 {
-		i.ImporterRequired = true
-	}
 }
 
 func (i *Input) setupTerragen() error {
@@ -74,6 +71,7 @@ func (i *Input) getTemplate() {
 		i.TemplateRaw.GitIgnore = gitignore
 		i.TemplateRaw.GolangCILint = golangCILint
 		i.TemplateRaw.GoReleaser = goReleaser
+		i.TemplateRaw.RegistryManifest = registryManifest
 		switch i.TerraformPluginFramework {
 		case false:
 			i.TemplateRaw.ProviderTemp = providerTemp
@@ -150,13 +148,20 @@ func (i *Input) validatePrerequisite() bool {
 		}
 	}
 
+	if tfPluginDocsCmd := exec.Command("tfplugindocs"); tfPluginDocsCmd.Err != nil {
+		if !errors.Is(tfPluginDocsCmd.Err, exec.ErrDot) {
+			i.logger.Error(tfPluginDocsCmd.Err.Error())
+			i.logger.Error("install tfplugindocs: https://github.com/hashicorp/terraform-plugin-docs")
+			success = false
+		}
+	}
+
 	if success {
-		i.logger.Info("scaffolds would be generated with following golang version")
 		out, err := exec.Command("go", "version").Output()
 		if err != nil {
 			i.logger.Error(err.Error())
 		}
-		i.logger.Info(string(bytes.TrimRight(out, "\n")))
+		i.logger.Debugf("scaffolds would be generated golang version: '%s'", string(bytes.TrimRight(out, "\n")))
 
 		return success
 	}

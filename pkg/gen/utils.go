@@ -43,10 +43,6 @@ func (i *Input) enrichNames() {
 		}
 		i.DataSource = datasource
 	}
-	//nolint:revive
-	if len(i.Importer) != 0 { //nolint:staticcheck
-		// to be implemented once we hit on importers.
-	}
 }
 
 func snakeCaseToCamelCase(input string) (camelCase string) {

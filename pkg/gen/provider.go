@@ -40,6 +40,8 @@ func (p *Provider) Create() error {
 		p.logger.Fatalf("oops rendering provider %s errored with: %v ", p.Provider, err)
 	}
 
+	p.logger.Infof("scaffolds for provider '%s' would be generated under: '%s'", p.Provider, p.Path)
+
 	if p.DryRun {
 		p.logger.Infof("provider '%s' would be created under '%s'", p.Provider, p.Path)
 		p.logger.Infof("contents of provider looks like")
@@ -115,7 +117,7 @@ func (p *Provider) GetUpdated() error {
 func (p *Provider) Scaffolded() bool {
 	metadatataPath := filepath.Join(p.Path, terragenMetadata)
 	if _, dirErr := os.Stat(metadatataPath); os.IsNotExist(dirErr) {
-		p.logger.Errorf("unable to find the terragen.yml from '%s'", metadatataPath)
+		p.logger.Warnf("unable to find the terragen.yml from '%s', ignore if this is first run", metadatataPath)
 
 		return false
 	}

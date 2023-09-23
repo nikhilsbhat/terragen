@@ -11,6 +11,7 @@ import (
 var cmd *cobra.Command
 
 func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	initCommands()
 	cmd = SetTerragenCommands()
 }

@@ -87,6 +87,11 @@ func (i *Input) MetadataScaffolded() bool {
 }
 
 func (i *Input) getMetadata() *Config {
+	importer := make([]string, 0)
+	if i.ImporterRequired {
+		importer = append(importer, i.Resource...)
+	}
+
 	return &Config{
 		Version:       version.Version,
 		RepoGroup:     i.RepoGroup,
@@ -94,7 +99,7 @@ func (i *Input) getMetadata() *Config {
 		ProviderPath:  i.Path,
 		Resources:     i.Resource,
 		DataSources:   i.DataSource,
-		Importers:     []string{i.Importer},
+		Importers:     importer,
 		ProjectModule: i.mod,
 	}
 }

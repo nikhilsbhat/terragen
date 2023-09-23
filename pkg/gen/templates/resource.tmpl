@@ -14,7 +14,12 @@ func {{ toCamel (index .Name .Index) }}() *schema.Resource {
         DeleteContext: {{ toCamel (index .Name .Index) }}Delete,
         UpdateContext: {{ toCamel (index .Name .Index) }}Update,
         Schema: map[string]*schema.Schema{},
-        }
+        {{- if .Importer }}
+        Importer: &schema.ResourceImporter{
+            StateContext: {{ toCamel (index .Name .Index) }}Import,
+        },
+        {{- end }}
+    }
 }
 
 func {{ toCamel (index .Name .Index) }}Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics  {
@@ -36,3 +41,10 @@ func {{ toCamel (index .Name .Index) }}Update(ctx context.Context, d *schema.Res
     // Your code goes here
     return nil
 }
+
+{{ if .Importer }}
+func {{ toCamel (index .Name .Index) }}Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error)  {
+    // Your code goes here
+    return []*schema.ResourceData{d}, nil
+}
+{{- end -}}

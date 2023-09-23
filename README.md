@@ -1,6 +1,10 @@
 # terragen
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE) [![shields](https://godoc.org/github.com/nikhilsbhat/terragen?status.svg)](https://godoc.org/github.com/nikhilsbhat/terragen)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terragen)](https://goreportcard.com/report/github.com/nikhilsbhat/terragen)
+[![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terragen/blob/master/LICENSE)
+[![shields](https://godoc.org/github.com/nikhilsbhat/terragen?status.svg)](https://godoc.org/github.com/nikhilsbhat/terragen)
+[![shields](https://img.shields.io/github/v/tag/nikhilsbhat/terragen.svg)](https://github.com/nikhilsbhat/terragen/tags)
+[![shields](https://img.shields.io/github/downloads/nikhilsbhat/terragen/total.svg)](https://github.com/nikhilsbhat/terragen/releases)
 
 A utility to ease the development of [terraform](https://www.terraform.io/) custom provider by generating scaffolds for provider and their components.
 
